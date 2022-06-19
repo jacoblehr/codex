@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button, VStack, Textarea, FormHelperText } from "@chakra-ui/react";
+import { VStack, Textarea, FormHelperText } from "@chakra-ui/react";
 import { Flex, FormControl, FormLabel, Input } from "@chakra-ui/react";
 
 import { Link as TLink } from "../../main/db/entities/links";
@@ -49,11 +49,14 @@ export const Link = ({ link, view }: LinkProps) => {
 							setFieldValue(key, e.currentTarget.value);
 						};
 
+					console.warn(dirty);
+					console.warn(values);
+
 					React.useEffect(() => {
-						if (dirty) {
+						if(dirty && !Object.keys(errors).length) {
 							submitForm();
 						}
-					}, [dirty]);
+					}, [dirty, errors]);
 
 					return (
 						<Form style={{ width: "100%" }} noValidate>
