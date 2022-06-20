@@ -6332,7 +6332,7 @@
     "err-code" "^2.0.2"
     "retry" "^0.12.0"
 
-"prop-types@^15.6.2", "prop-types@^15.7.2":
+"prop-types@^15.5.4", "prop-types@^15.6.2", "prop-types@^15.7.2":
   "integrity" "sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg=="
   "resolved" "https://registry.npmjs.org/prop-types/-/prop-types-15.8.1.tgz"
   "version" "15.8.1"
@@ -6488,6 +6488,11 @@
   "resolved" "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz"
   "version" "16.13.1"
 
+"react-lifecycles-compat@^3.0.4":
+  "integrity" "sha512-fBASbA6LnOU9dOU2eW7aQ8xmYBSXUIWr+UmF9b1efZBazGNO+rcXT/icdKnYm2pTwcRylVUYwW7H1PHfLekVzA=="
+  "resolved" "https://registry.npmjs.org/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz"
+  "version" "3.0.4"
+
 "react-query@^4.0.0-beta.23":
   "integrity" "sha512-e6mNBVAYGy0M1OwX0mhRB/lCkOedKeqTUrbPjNCqvm8hQGUsJJobqfHVvTv8o6JJaOO2MFcxKF4vZM+PEKbHZA=="
   "resolved" "https://registry.npmjs.org/react-query/-/react-query-4.0.0-beta.23.tgz"
@@ -6517,6 +6522,22 @@
     "tslib" "^1.0.0"
     "use-callback-ref" "^1.2.3"
     "use-sidecar" "^1.0.1"
+
+"react-split-pane@^0.1.92":
+  "integrity" "sha512-GfXP1xSzLMcLJI5BM36Vh7GgZBpy+U/X0no+VM3fxayv+p1Jly5HpMofZJraeaMl73b3hvlr+N9zJKvLB/uz9w=="
+  "resolved" "https://registry.npmjs.org/react-split-pane/-/react-split-pane-0.1.92.tgz"
+  "version" "0.1.92"
+  dependencies:
+    "prop-types" "^15.7.2"
+    "react-lifecycles-compat" "^3.0.4"
+    "react-style-proptype" "^3.2.2"
+
+"react-style-proptype@^3.2.2":
+  "integrity" "sha512-ywYLSjNkxKHiZOqNlso9PZByNEY+FTyh3C+7uuziK0xFXu9xzdyfHwg4S9iyiRRoPCR4k2LqaBBsWVmSBwCWYQ=="
+  "resolved" "https://registry.npmjs.org/react-style-proptype/-/react-style-proptype-3.2.2.tgz"
+  "version" "3.2.2"
+  dependencies:
+    "prop-types" "^15.5.4"
 
 "react-style-singleton@^2.1.0":
   "integrity" "sha512-jNRp07Jza6CBqdRKNgGhT3u9umWvils1xsuMOjZlghBDH2MU0PL2WZor4PGYjXpnRCa9DQSlHMs/xnABWOwYbA=="

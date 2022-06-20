@@ -105,6 +105,7 @@
 		"react": "^17.0.2",
 		"react-dom": "^17.0.2",
 		"react-query": "^4.0.0-beta.23",
+		"react-split-pane": "^0.1.92",
 		"xstate": "^5.0.0-alpha.0"
 	}
 }

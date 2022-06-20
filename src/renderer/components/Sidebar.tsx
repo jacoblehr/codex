@@ -22,7 +22,6 @@ export const Sidebar = ({}: SideBarProps) => {
 			direction="column"
 			height="100%"
 			width="auto"
-			minWidth="300px"
 			borderRight="1px solid"
 			borderColor="gray.300"
 			overflow="auto"

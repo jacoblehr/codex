@@ -11,7 +11,7 @@ import { AddIcon, CloseIcon } from "@chakra-ui/icons";
 import { useAppContext } from "../context/AppContextProvider";
 import { Tab as AppTab } from "../hooks/tabs";
 import { Link } from "./Link";
-import { getRandomID } from "../..//utils";
+import { getRandomID } from "../../utils";
 
 type MainProps = {};
 
