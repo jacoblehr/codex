@@ -123,7 +123,7 @@ export abstract class Entity<ReadSchema, WriteSchema> {
         return result;
     }
 
-    public async findAllGrouped(args: { db: sqlite.Database } & BulkReadOperation<ReadSchema>): Promise<Array<ReadSchema>> {
+    public async findAllGrouped(args: { db: sqlite.Database } & BulkReadOperation<any>): Promise<Array<ReadSchema>> {
         const { db, where } = args;
 
         const readStatementRaw = this.findAllGroupedStatement;

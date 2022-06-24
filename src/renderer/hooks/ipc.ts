@@ -3,8 +3,10 @@ const { ipcRenderer } = window.require("electron");
 import { useMutation, useQuery, QueryKey, MutationOptions, QueryOptions } from "react-query";
 import { IDSchema } from "../../main/db/entities/entity";
 import { WriteLink, Link, ReadLink } from "../../main/db/entities/links";
+import { TagGrouped } from "../../main/db/entities/tags";
 
 export const LINKS_KEY = `links`;
+export const TAGS_KEY = `tags`;
 
 /**
  * Links
@@ -63,4 +65,12 @@ export const useGetLinks = (options?: QueryOptions<any, {}, Array<Link>, QueryKe
     };
 
     return useQuery<any, unknown, Array<Link>, QueryKey>([LINKS_KEY], getLinks, { ...options });
+};
+
+export const useGetTags = (options?: QueryOptions<any, {}, Array<TagGrouped>, QueryKey>) => {
+    const getTags = () => {
+        return ipcRenderer.invoke("get-tags");
+    };
+
+    return useQuery<any, unknown, Array<TagGrouped>, QueryKey>([TAGS_KEY], getTags, { ...options });
 };

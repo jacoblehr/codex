@@ -11,6 +11,11 @@ export type ReadTag = {
 export type Tag = ReadTag;
 export type WriteTag = Omit<ReadTag, "id">;
 
+export type TagGrouped = {
+    tag: string;
+    count: number;
+};
+
 export class Tags extends Entity<ReadTag, WriteTag> {
     public async find(args: { db: sqlite.Database } & ReadOperation<IDSchema>): Promise<ReadTag> {
         const tag = await super.find(args);
