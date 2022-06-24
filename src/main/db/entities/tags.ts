@@ -5,7 +5,7 @@ import Links, { ReadLink } from "./links";
 export type ReadTag = {
     id: number;
     link_id: number;
-    tag_id: number;
+    tag: string;
     link?: ReadLink;
 };
 export type Tag = ReadTag;
