@@ -2,69 +2,69 @@ const { ipcRenderer } = window.require("electron");
 
 import { useMutation, useQuery, QueryKey, MutationOptions, QueryOptions } from "react-query";
 import { IDSchema } from "../../main/db/entities/entity";
-import { WriteLink, Link, ReadLink } from "../../main/db/entities/links";
+import { WriteBookmark, Bookmark, ReadBookmark } from "../../main/db/entities/bookmarks";
 import { TagGrouped } from "../../main/db/entities/tags";
 
-export const LINKS_KEY = `links`;
+export const bookmarkS_KEY = `bookmarks`;
 export const TAGS_KEY = `tags`;
 
 /**
- * Links
+ * bookmarks
  */
-export const useCreateLink = (options?: MutationOptions<ReadLink, unknown, WriteLink, unknown>) => {
-    const createLink = async (input: WriteLink) => {
-        const link = await ipcRenderer.invoke("create-link", {
+export const useCreateBookmark = (options?: MutationOptions<ReadBookmark, unknown, WriteBookmark, unknown>) => {
+    const createbookmark = async (input: WriteBookmark) => {
+        const bookmark = await ipcRenderer.invoke("create-bookmark", {
             ...input,
         });
 
-        return link as Link;
+        return bookmark as Bookmark;
     };
 
-    return useMutation<Link, unknown, WriteLink, unknown>(createLink, {
+    return useMutation<Bookmark, unknown, WriteBookmark, unknown>(createbookmark, {
         ...options,
     });
 };
 
-export const useGetLink = (id: number, options?: QueryOptions<Link, unknown, ReadLink, QueryKey>) => {
-    const getLink = () => {
-        return ipcRenderer.invoke("get-link", {
+export const useGetbookmark = (id: number, options?: QueryOptions<Bookmark, unknown, ReadBookmark, QueryKey>) => {
+    const getbookmark = () => {
+        return ipcRenderer.invoke("get-bookmark", {
             id,
-        }) as Promise<Link>;
+        }) as Promise<Bookmark>;
     };
 
-    return useQuery<Link, unknown, unknown, QueryKey>([LINKS_KEY, id.toString()], getLink, {
+    return useQuery<Bookmark, unknown, unknown, QueryKey>([bookmarkS_KEY, id.toString()], getbookmark, {
         ...options,
     });
 };
 
-export const useUpdateLink = (options?: MutationOptions<unknown, unknown, WriteLink, unknown>) => {
-    const updateLink = (input: IDSchema & WriteLink) => {
-        return ipcRenderer.invoke("update-link", {
+export const useUpdateBookmark = (options?: MutationOptions<unknown, unknown, WriteBookmark, unknown>) => {
+    const updatebookmark = (input: IDSchema & WriteBookmark) => {
+        return ipcRenderer.invoke("update-bookmark", {
             ...input,
-        }) as Promise<Link>;
+        }) as Promise<Bookmark>;
     };
 
-    return useMutation<Link, unknown, IDSchema & WriteLink, unknown>(updateLink, { ...options });
+    return useMutation<Bookmark, unknown, IDSchema & WriteBookmark, unknown>(updatebookmark, { ...options });
 };
 
-export const useDeleteLink = (options?: any) => {
-    const deleteLink = (input: IDSchema) => {
-        return ipcRenderer.invoke("delete-link", {
+export const useDeleteBookmark = (options?: any) => {
+    const deletebookmark = (input: IDSchema) => {
+        return ipcRenderer.invoke("delete-bookmark", {
             ...input,
         });
     };
 
-    return useMutation<Link, unknown, IDSchema, unknown>(deleteLink, {
+    return useMutation<Bookmark, unknown, IDSchema, unknown>(deletebookmark, {
         ...options,
     });
 };
 
-export const useGetLinks = (options?: QueryOptions<any, {}, Array<Link>, QueryKey>) => {
-    const getLinks = () => {
-        return ipcRenderer.invoke("get-links");
+export const useGetBookmarks = (options?: QueryOptions<any, {}, Array<Bookmark>, QueryKey>) => {
+    const getbookmarks = () => {
+        return ipcRenderer.invoke("get-bookmarks");
     };
 
-    return useQuery<any, unknown, Array<Link>, QueryKey>([LINKS_KEY], getLinks, { ...options });
+    return useQuery<any, unknown, Array<Bookmark>, QueryKey>([bookmarkS_KEY], getbookmarks, { ...options });
 };
 
 export const useGetTags = (options?: QueryOptions<any, {}, Array<TagGrouped>, QueryKey>) => {

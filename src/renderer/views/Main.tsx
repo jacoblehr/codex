@@ -3,7 +3,7 @@ import { Flex, Tabs, TabList, TabPanels, Tab, TabPanel, Spinner } from "@chakra-
 import { AddIcon, CloseIcon } from "@chakra-ui/icons";
 import { useAppContext } from "../context/AppContextProvider";
 import { Tab as AppTab } from "../hooks/tabs";
-import { Link } from "./Link";
+import { bookmark } from "./bookmark";
 import { getRandomID } from "../../utils";
 
 type MainProps = {};
@@ -19,7 +19,7 @@ export const Main = ({}: MainProps) => {
         tabs.add(
             {
                 key: getRandomID(),
-                view: "link-create",
+                view: "bookmark-create",
             },
             tabs.data.length
         );
@@ -94,7 +94,7 @@ export const Main = ({}: MainProps) => {
                     {tabs?.data.map((t: AppTab, index: number) => {
                         return (
                             <TabPanel key={`tab-panel-${index}`} display="flex" flex="1" justifyContent="center">
-                                <Link link={t.data} view={t.view} />
+                                <bookmark bookmark={t.data} view={t.view} />
                             </TabPanel>
                         );
                     })}

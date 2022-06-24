@@ -2,8 +2,7 @@ import { dialog, ipcMain } from "electron";
 
 import db from "../db";
 import Entities from "../db/entities";
-import { ReadLink, WriteLink } from "../db/entities/links";
-import { ReadTag, WriteTag } from "../db/entities/tags";
+import { ReadBookmark, WriteBookmark } from "../db/entities/bookmarks";
 
 export const registerHandlers = () => {
     /**
@@ -41,103 +40,89 @@ export const registerHandlers = () => {
      * Database Operations
      */
 
-    /* Links */
+    /* Bookmarks */
 
-    ipcMain.handle("create-link", async (_event: Electron.IpcMainInvokeEvent, args: WriteLink) => {
+    ipcMain.handle("create-bookmark", async (_event: Electron.IpcMainInvokeEvent, args: WriteBookmark) => {
         const { name, uri, description } = args;
 
-        const link = await Entities.links.create({
+        const bookmark = await Entities.bookmarks.create({
             db: db.database,
-            input: { name, uri, description, tags: [] },
+            input: { name, uri, description },
         });
 
-        const tags = await Promise.all(
-            args.tags.map(async (t: WriteTag) => {
-                return await Entities.tags.create({
-                    db: db.database,
-                    input: {
-                        link_id: link.id,
-                        tag: t.tag,
-                    },
-                });
-            })
-        );
-
-        link.tags = tags;
-
-        _event.returnValue = link;
-        return link;
+        _event.returnValue = bookmark;
+        return bookmark;
     });
 
-    ipcMain.handle("get-link", async (_event: Electron.IpcMainInvokeEvent, args: { id: number }) => {
+    ipcMain.handle("get-bookmark", async (_event: Electron.IpcMainInvokeEvent, args: { id: number }) => {
         const { id } = args;
 
-        const link = await Entities.links.find({
+        const bookmark = await Entities.bookmarks.find({
             db: db.database,
             id,
         });
 
-        _event.returnValue = link;
-        return link;
+        _event.returnValue = bookmark;
+        return bookmark;
     });
 
-    ipcMain.handle("update-link", async (_event: Electron.IpcMainInvokeEvent, args: WriteLink & { id: number }) => {
+    ipcMain.handle("update-bookmark", async (_event: Electron.IpcMainInvokeEvent, args: WriteBookmark & { id: number }) => {
         const { id, name, uri, description } = args;
 
-        const link = await Entities.links.update({
+        const bookmark = await Entities.bookmarks.update({
             db: db.database,
             id,
             input: { name, uri, description },
         });
 
-        const existingTags = await Entities.tags.findAll({
-            db: db.database,
-            where: {
-                link_id: link.id,
-            },
-        });
+        // const existingTags = await Entities.tags.findAll({
+        //     db: db.database,
+        //     where: {
+        //         bookmark_id: bookmark.id,
+        //     },
+        // });
 
-        const addTags = args.tags.filter((wt: WriteTag) => !tags.find((rt: ReadTag) => rt.tag === wt.tag));
-        const removeTags = existingTags.filter((rt: ReadTag) => !args.tags.find((wt: WriteTag) => rt.tag === wt.tag));
+        // const addTags = args.tags.filter((wt: WriteTag) => !tags.find((rt: ReadTag) => rt.tag === wt.tag));
+        // const removeTags = existingTags.filter((rt: ReadTag) => !args.tags.find((wt: WriteTag) => rt.tag === wt.tag));
 
-        await Promise.all(
-            addTags.map(async (tag: WriteTag) => {
-                await Entities.tags.create({
-                    db: db.database,
-                    input: {
-                        link_id: link.id,
-                        tag: tag.tag,
-                    },
-                });
-            })
-        );
+        // await Promise.all(
+        //     addTags.map(async (tag: WriteTag) => {
+        //         await Entities.tags.create({
+        //             db: db.database,
+        //             input: {
+        //                 bookmark_id: bookmark.id,
+        //                 tag: tag.tag,
+        //             },
+        //         });
+        //     })
+        // );
 
-        await Promise.all(
-            removeTags.map(async (tag: ReadTag) => {
-                await Entities.tags.delete({
-                    db: db.database,
-                    id: tag.id,
-                });
-            })
-        );
+        // await Promise.all(
+        //     removeTags.map(async (tag: ReadTag) => {
+        //         await Entities.tags.delete({
+        //             db: db.database,
+        //             id: tag.id,
+        //         });
+        //     })
+        // );
 
-        const tags = await Entities.tags.findAll({
-            db: db.database,
-            where: {
-                link_id: link.id,
-            },
-        });
+        // const tags = await Entities.tags.findAll({
+        //     db: db.database,
+        //     where: {
+        //         bookmark_id: bookmark.id,
+        //     },
+        // });
 
-        link.tags = tags;
+        // bookmark.tags = tags;
 
-        _event.returnValue = link;
-        return link;
+        _event.returnValue = bookmark;
+        return bookmark;
     });
 
-    ipcMain.handle("delete-link", async (_event: Electron.IpcMainInvokeEvent, args: { id: number }) => {
+    ipcMain.handle("delete-bookmark", async (_event: Electron.IpcMainInvokeEvent, args: { id: number }) => {
         const { id } = args;
 
-        const result = await Entities.links.delete({
+        const result = await Entities.bookmarks.delete({
             db: db.database,
             id,
         });
@@ -146,23 +131,13 @@ export const registerHandlers = () => {
         return result;
     });
 
-    ipcMain.handle("get-links", async (_event: Electron.IpcMainInvokeEvent, args: Partial<ReadLink>) => {
-        const links = await Entities.links.findAll({
+    ipcMain.handle("get-bookmarks", async (_event: Electron.IpcMainInvokeEvent, args: Partial<ReadBookmark>) => {
+        const bookmarks = await Entities.bookmarks.findAll({
             db: db.database,
             where: { ...args },
         });
 
-        _event.returnValue = links;
-        return links;
-    });
-
-    /* Tags */
-    ipcMain.handle("get-tags", async (_event: Electron.IpcMainInvokeEvent) => {
-        const tags = await Entities.tags.findAllGrouped({
-            db: db.database,
-        });
-
-        _event.returnValue = tags;
-        return tags;
+        _event.returnValue = bookmarks;
+        return bookmarks;
     });
 };

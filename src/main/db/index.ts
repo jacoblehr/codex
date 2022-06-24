@@ -19,7 +19,7 @@ export class Database {
     }
 
     public async migrate(): Promise<void> {
-        await Entities.links.init(this.database);
+        await Entities.bookmarks.init(this.database);
         await Entities.tags.init(this.database);
 
         return;

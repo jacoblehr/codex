@@ -1,7 +1,7 @@
-import { Links } from "./links";
+import { Bookmarks } from "./bookmarks";
 import { Tags } from "./tags";
 
 export default {
-    links: new Links(),
+    bookmarks: new Bookmarks(),
     tags: new Tags(),
 };

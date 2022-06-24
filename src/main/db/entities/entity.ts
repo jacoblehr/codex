@@ -34,7 +34,6 @@ export abstract class Entity<ReadSchema, WriteSchema> {
     public abstract deleteStatement: string;
 
     public abstract findAllStatement: string;
-    public abstract findAllGroupedStatement: string;
 
     public async init(db: sqlite.Database): Promise<void> {
         await db.exec(this.initStatement);
@@ -102,31 +101,6 @@ export abstract class Entity<ReadSchema, WriteSchema> {
         const { db, where } = args;
 
         const readStatementRaw = this.findAllStatement;
-
-        const readStatement = db.prepare<Partial<ReadSchema>>(`
-			${readStatementRaw}
-			${
-                where
-                    ? Object.keys(where)
-                          .map((key: string, index: number) => {
-                              return `
-					${index === 0 ? "WHERE" : "AND"} ${key} = @${key}
-				`;
-                          })
-                          .join("\n")
-                    : ""
-            }
-		`);
-
-        const result = await readStatement.all(where ?? {});
-
-        return result;
-    }
-
-    public async findAllGrouped(args: { db: sqlite.Database } & BulkReadOperation<any>): Promise<Array<ReadSchema>> {
-        const { db, where } = args;
-
-        const readStatementRaw = this.findAllGroupedStatement;
 
         const readStatement = db.prepare<Partial<ReadSchema>>(`
 			${readStatementRaw}

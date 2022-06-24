@@ -2,44 +2,44 @@ import * as React from "react";
 import { VStack, Textarea, FormHelperText } from "@chakra-ui/react";
 import { Flex, FormControl, FormLabel, Input } from "@chakra-ui/react";
 
-import { Link as TLink } from "../../main/db/entities/links";
+import { bookmark as Tbookmark } from "../../main/db/entities/bookmarks";
 import { Form, Formik } from "formik";
 import { validateRequired } from "../../utils";
 import { useAppContext } from "../context/AppContextProvider";
 import { TabView } from "../hooks/tabs";
 
-export type LinkProps = {
-    link?: TLink;
+export type bookmarkProps = {
+    bookmark?: Tbookmark;
     view: TabView;
 };
 
 export type FormInput = HTMLInputElement | HTMLTextAreaElement;
 
-export const Link = ({ link, view }: LinkProps) => {
-    const { links, tabs } = useAppContext();
+export const bookmark = ({ bookmark, view }: bookmarkProps) => {
+    const { bookmarks, tabs } = useAppContext();
 
     const onSubmit = async (values: any) => {
-        if (!link || view === "link-create") {
-            await links.create({ ...values }, (response: TLink) => {
+        if (!bookmark || view === "bookmark-create") {
+            await bookmarks.create({ ...values }, (response: Tbookmark) => {
                 tabs.update(tabs.active, {
                     ...tabs.data[tabs.active],
-                    key: `link-${response.id}`,
+                    key: `bookmark-${response.id}`,
                     data: response,
-                    view: "link",
+                    view: "bookmark",
                 });
             });
         } else {
-            await links.save(link.id, { ...values });
+            await bookmarks.save(bookmark.id, { ...values });
         }
     };
 
     return (
         <Flex direction="column" style={{ width: "100%" }}>
-            <Formik<TLink>
+            <Formik<Tbookmark>
                 enableReinitialize={true}
-                initialValues={{ ...link }}
+                initialValues={{ ...bookmark }}
                 onSubmit={onSubmit}
-                validate={(values: TLink) => {
+                validate={(values: Tbookmark) => {
                     return validateRequired(values, ["uri"]);
                 }}
             >

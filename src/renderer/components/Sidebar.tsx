@@ -3,18 +3,18 @@ import { Flex, Heading, Text } from "@chakra-ui/react";
 
 import { CloseIcon } from "@chakra-ui/icons";
 import { useAppContext } from "../context/AppContextProvider";
-import { Link } from "../../main/db/entities/links";
+import { Bookmark } from "../../main/db/entities/bookmarks";
 import { Tab } from "../hooks/tabs";
 
 type SideBarProps = {};
 
 export const Sidebar = ({}: SideBarProps) => {
-    const { links, tabs } = useAppContext();
+    const { bookmarks, tabs } = useAppContext();
 
     const handleRemoveClick = (id: number) => {
         const index = tabs.data.findIndex((t: Tab) => t.data.id === id);
         tabs.remove(index);
-        links._delete(id);
+        bookmarks._delete(id);
     };
 
     return (
@@ -36,12 +36,20 @@ export const Sidebar = ({}: SideBarProps) => {
                 </Flex>
                 <Flex flex="1" alignItems="center" justifyContent="space-between" borderBottom="1px solid" borderBottomColor="gray.200" p={2}>
                     <Heading size="sm" fontWeight="normal">
-                        Links
+                        bookmarks
                     </Heading>
                 </Flex>
                 <Flex direction="column">
-                    {links?.data?.map((link: Link, index: number) => {
-                        return <LinkItem key={`link-${link.id}-${index}`} link={link} onRemove={handleRemoveClick} onClick={tabs.add} index={index} />;
+                    {bookmarks?.data?.map((bookmark: Bookmark, index: number) => {
+                        return (
+                            <BookmarkItem
+                                key={`bookmark-${bookmark.id}-${index}`}
+                                bookmark={bookmark}
+                                onRemove={handleRemoveClick}
+                                onClick={tabs.add}
+                                index={index}
+                            />
+                        );
                     })}
                 </Flex>
             </Flex>
@@ -49,14 +57,14 @@ export const Sidebar = ({}: SideBarProps) => {
     );
 };
 
-const LinkItem = ({ link, onClick, onRemove }: { index: number; link?: Link; onClick: (tab: Tab) => void; onRemove: (id: number) => void }) => {
+const BookmarkItem = ({ bookmark, onClick, onRemove }: { index: number; bookmark?: Bookmark; onClick: (tab: Tab) => void; onRemove: (id: number) => void }) => {
     return (
         <Flex
             onClick={() =>
                 onClick({
-                    key: `link-${link.id}`,
-                    view: "link",
-                    data: link,
+                    key: `bookmark-${bookmark.id}`,
+                    view: "bookmark",
+                    data: bookmark,
                 })
             }
             cursor="pointer"
@@ -65,11 +73,11 @@ const LinkItem = ({ link, onClick, onRemove }: { index: number; link?: Link; onC
             justifyContent="space-between"
             alignItems="center"
         >
-            <Text>{link?.name || "Untitled"}</Text>
+            <Text overflow="ellipsis">{bookmark?.name || "Untitled"}</Text>
             <CloseIcon
                 onClick={(e) => {
                     e.stopPropagation();
-                    onRemove(link.id);
+                    onRemove(bookmark.id);
                 }}
                 cursor="pointer"
                 fontSize="xs"
