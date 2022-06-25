@@ -11,7 +11,7 @@ export type BookmarkView = {
     Bookmark: BookmarkEntity;
 };
 
-export const BookmarkS_KEY = "Bookmarks";
+export const BOOKMARKS_KEY = "bookmarks";
 
 export const useBookmarks = () => {
     const { data } = useGetBookmarks();
@@ -20,12 +20,12 @@ export const useBookmarks = () => {
     const { mutate: updateBookmark } = useUpdateBookmark();
     const { mutate: deleteBookmark } = useDeleteBookmark();
 
-    const [Bookmarks, setBookmarks] = React.useState([]);
+    const [bookmarks, setBookmarks] = React.useState([]);
 
     const queryClient = useQueryClient();
 
     const add = (Bookmark: Bookmark) => {
-        const updatedData = [...Bookmarks, Bookmark];
+        const updatedData = [...bookmarks, Bookmark];
         setBookmarks(updatedData);
     };
 
@@ -35,7 +35,7 @@ export const useBookmarks = () => {
             {
                 onSuccess: (_data: Bookmark) => {
                     onSuccess && onSuccess(_data);
-                    queryClient.invalidateQueries([BookmarkS_KEY]);
+                    queryClient.invalidateQueries([BOOKMARKS_KEY]);
                 },
                 onError: (e: Error) => {
                     console.warn(`An error has occurred: ${e.message}`);
@@ -49,7 +49,7 @@ export const useBookmarks = () => {
             { id },
             {
                 onSuccess: () => {
-                    queryClient.invalidateQueries([BookmarkS_KEY]);
+                    queryClient.invalidateQueries([BOOKMARKS_KEY]);
                 },
                 onError: (e: Error) => {
                     console.warn(`An error has occurred: ${e.message}`);
@@ -59,12 +59,12 @@ export const useBookmarks = () => {
     };
 
     const remove = (id: number) => {
-        const updatedData = [...Bookmarks];
+        const updatedData = [...bookmarks];
         setBookmarks(updatedData.filter((l: Bookmark) => l.id === id));
     };
 
     const update = (id: number, input: WriteBookmark) => {
-        const updatedData = [...Bookmarks];
+        const updatedData = [...bookmarks];
         const targetIndex = updatedData.findIndex((l: Bookmark) => l.id === id);
 
         updatedData[targetIndex] = {
@@ -81,7 +81,7 @@ export const useBookmarks = () => {
             { id, ...input },
             {
                 onSuccess: () => {
-                    queryClient.invalidateQueries([BookmarkS_KEY]);
+                    queryClient.invalidateQueries([BOOKMARKS_KEY]);
                 },
                 onError: (e: Error) => {
                     console.warn(`An error has occurred: ${e.message}`);

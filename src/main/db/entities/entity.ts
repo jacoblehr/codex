@@ -34,6 +34,7 @@ export abstract class Entity<ReadSchema, WriteSchema> {
     public abstract deleteStatement: string;
 
     public abstract findAllStatement: string;
+    public abstract countStatement: string;
 
     public async init(db: sqlite.Database): Promise<void> {
         await db.exec(this.initStatement);
@@ -54,6 +55,7 @@ export abstract class Entity<ReadSchema, WriteSchema> {
             });
             return entity as ReadSchema;
         } catch (e) {
+            console.warn(e);
             throw new Error(`Failed to create entity`);
         }
     }
@@ -118,6 +120,18 @@ export abstract class Entity<ReadSchema, WriteSchema> {
 		`);
 
         const result = await readStatement.all(where ?? {});
+
+        return result;
+    }
+
+    public async count(args: { db: sqlite.Database }): Promise<Array<ReadSchema>> {
+        const { db } = args;
+
+        const countStatement = db.prepare<Partial<ReadSchema>>(`
+			${this.countStatement}
+		`);
+
+        const result = await countStatement.all({});
 
         return result;
     }

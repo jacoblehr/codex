@@ -2,25 +2,27 @@ import * as React from "react";
 import { VStack, Textarea, FormHelperText } from "@chakra-ui/react";
 import { Flex, FormControl, FormLabel, Input } from "@chakra-ui/react";
 
-import { bookmark as Tbookmark } from "../../main/db/entities/bookmarks";
+import { Bookmark as TBookmark } from "../../main/db/entities/bookmarks";
 import { Form, Formik } from "formik";
 import { validateRequired } from "../../utils";
 import { useAppContext } from "../context/AppContextProvider";
 import { TabView } from "../hooks/tabs";
+import { CreatableSelect } from "chakra-react-select";
 
 export type bookmarkProps = {
-    bookmark?: Tbookmark;
+    bookmark?: TBookmark;
     view: TabView;
 };
 
 export type FormInput = HTMLInputElement | HTMLTextAreaElement;
 
-export const bookmark = ({ bookmark, view }: bookmarkProps) => {
-    const { bookmarks, tabs } = useAppContext();
+export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
+    const { bookmarks, tabs, tags } = useAppContext();
 
     const onSubmit = async (values: any) => {
+        console.warn(values);
         if (!bookmark || view === "bookmark-create") {
-            await bookmarks.create({ ...values }, (response: Tbookmark) => {
+            await bookmarks.create({ ...values }, (response: TBookmark) => {
                 tabs.update(tabs.active, {
                     ...tabs.data[tabs.active],
                     key: `bookmark-${response.id}`,
@@ -35,11 +37,11 @@ export const bookmark = ({ bookmark, view }: bookmarkProps) => {
 
     return (
         <Flex direction="column" style={{ width: "100%" }}>
-            <Formik<Tbookmark>
+            <Formik<TBookmark>
                 enableReinitialize={true}
                 initialValues={{ ...bookmark }}
                 onSubmit={onSubmit}
-                validate={(values: Tbookmark) => {
+                validate={(values: TBookmark) => {
                     return validateRequired(values, ["uri"]);
                 }}
             >
@@ -96,6 +98,10 @@ export const bookmark = ({ bookmark, view }: bookmarkProps) => {
                                         onChange={handleChange("description")}
                                     />
                                     <FormHelperText color="red">{errors.description}</FormHelperText>
+                                </FormControl>
+                                <FormControl>
+                                    <FormLabel htmlFor="tags">Tags</FormLabel>
+                                    <CreatableSelect isMulti={true} options={[]} />
                                 </FormControl>
                             </VStack>
                         </Form>

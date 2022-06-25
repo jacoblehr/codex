@@ -3,6 +3,7 @@ import { dialog, ipcMain } from "electron";
 import db from "../db";
 import Entities from "../db/entities";
 import { ReadBookmark, WriteBookmark } from "../db/entities/bookmarks";
+import { ReadTag } from "../db/entities/tags";
 
 export const registerHandlers = () => {
     /**
@@ -139,5 +140,15 @@ export const registerHandlers = () => {
 
         _event.returnValue = bookmarks;
         return bookmarks;
+    });
+
+    ipcMain.handle("get-tags", async (_event: Electron.IpcMainInvokeEvent, args: Partial<ReadTag>) => {
+        const tags = await Entities.tags.findAll({
+            db: db.database,
+            where: { ...args },
+        });
+
+        _event.returnValue = tags;
+        return tags;
     });
 };

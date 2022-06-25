@@ -1,17 +1,14 @@
 import sqlite from "better-sqlite3";
+import { Bookmark } from "./bookmarks";
 import { BulkReadOperation, Entity, IDSchema, ReadOperation } from "./entity";
 
 export type ReadTag = {
     id: number;
     tag: string;
+    bookmarks: Array<Omit<Bookmark, "tags">>;
 };
 export type Tag = ReadTag;
 export type WriteTag = Omit<ReadTag, "id">;
-
-export type TagGrouped = {
-    tag: string;
-    count: number;
-};
 
 export class Tags extends Entity<ReadTag, WriteTag> {
     public async find(args: { db: sqlite.Database } & ReadOperation<IDSchema>): Promise<ReadTag> {
@@ -29,7 +26,6 @@ export class Tags extends Entity<ReadTag, WriteTag> {
 			id INTEGER PRIMARY KEY,
 			tag TEXT NOT NULL,
 
-			FOREIGN KEY (bookmark_id) REFERENCES bookmarks(id),
 			UNIQUE(tag)
 		);
 	`;
@@ -40,15 +36,15 @@ export class Tags extends Entity<ReadTag, WriteTag> {
 	`;
 
     public findStatement = `
-		SELECT *
-		FROM tags
-		WHERE id = @id;
+		SELECT t.*, json_array(bt.*) AS bookmarks,
+		FROM tags t
+		LEFT JOIN bookmark_tags bt ON t.id = bt.tag_id
+		WHERE t.id = @id;
 	`;
 
     public updateStatement = `
 		UPDATE tags
 		SET
-			bookmark_id = @bookmark_id,
 			tag = @tag
 		WHERE id = @id;
 	`;
@@ -64,10 +60,11 @@ export class Tags extends Entity<ReadTag, WriteTag> {
 		FROM tags
 	`;
 
-    public findAllGroupedStatement = `
-		SELECT t.tag, count(*)
+    public countStatement = `
+		SELECT t.id, IFNULL(COUNT(t.id), 0)
 		FROM tags t
-		GROUP BY t.tag
+		LEFT JOIN bookmark_tags bt ON t.id = bt.tag_id
+		GROUP BY t.id
 	`;
 }
 

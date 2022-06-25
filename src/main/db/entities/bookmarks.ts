@@ -1,5 +1,6 @@
 import { BulkReadOperation, Entity, IDSchema, ReadOperation } from "./entity";
 import sqlite from "better-sqlite3";
+import { Tag } from "./tags";
 
 export type ReadBookmark = {
     id: number;
@@ -8,13 +9,15 @@ export type ReadBookmark = {
     created_at: string;
     updated_at: string;
     description?: string;
+    tags: Array<Tag>;
 };
 export type Bookmark = ReadBookmark;
-export type WriteBookmark = Omit<ReadBookmark, "id" | "created_at" | "updated_at">;
+export type WriteBookmark = Omit<ReadBookmark, "id" | "created_at" | "updated_at" | "tags">;
 
 export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
     public async find(args: { db: sqlite.Database } & ReadOperation<IDSchema>): Promise<ReadBookmark> {
         const bookmark = await super.find(args);
+
         return bookmark;
     }
 
@@ -46,9 +49,19 @@ export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
 	`;
 
     public findStatement = `
-		SELECT *
-		FROM bookmarks
-		WHERE id = @id;
+		SELECT b.*, IFNULL(t.tags, '[]') AS tags
+		FROM bookmarks b
+		LEFT JOIN bookmark_tags bt ON b.id = bt.bookmark_id
+		LEFT JOIN (
+			SELECT _tags.id, json_group_array(
+				json_object(
+					'id', _tags.id,
+					'tag', _tags.tag
+				)
+			) AS tags
+			FROM tags _tags
+		) AS t ON t.id = bt.tag_id
+		WHERE b.id = @id;
 	`;
 
     public updateStatement = `
@@ -67,14 +80,25 @@ export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
 	`;
 
     public findAllStatement = `
-		SELECT *
-		FROM bookmarks
+		SELECT b.*, IFNULL(t.tags, '[]') AS tags
+		FROM bookmarks b
+		LEFT JOIN bookmark_tags bt ON b.id = bt.bookmark_id
+		LEFT JOIN (
+			SELECT _tags.id, json_group_array(
+				json_object(
+					'id', _tags.id,
+					'tag', _tags.tag
+				)
+			) AS tags
+			FROM tags _tags
+		) AS t ON t.id = bt.tag_id;
 	`;
 
-    public findAllGroupedStatement = `
-		SELECT bookmark, count(*) 
-		FROM bookmarks l
-		JOIN tags t ON t.bookmark_id = l.id
+    public countStatement = `
+		SELECT b.id, IFNULL(COUNT(b.id), 0)
+		FROM bookmarks b
+		LEFT JOIN bookmark_tags bt ON b.id = bt.bookmark_id
+		GROUP BY b.id
 	`;
 }
 
