@@ -9,7 +9,7 @@ export type ReadOperation<T> = {
 };
 
 export type UpdateOperation<T> = {
-    id: number;
+    id?: number;
     input: Omit<T, "id">;
 };
 
@@ -17,13 +17,32 @@ export type DeleteOperation<T> = {
     id: number;
 };
 
+export type BulkUpdateOperation<T> = {
+    where?: WhereClause<T>;
+    input: Omit<T, "id">;
+};
+
+export type BulkDeleteOperation<T> = {
+    where?: WhereClause<T>;
+};
+
 export type BulkReadOperation<T> = {
-    where?: Partial<T>;
+    where?: WhereClause<T>;
 };
 
 export type IDSchema = {
     id: number;
 };
+
+export type WhereClause<T> = {
+    [key in keyof T]?: {
+        key: string;
+        value: any;
+        operation?: WhereOperation;
+    };
+};
+
+export type WhereOperation = "eq" | "=" | "in";
 
 export abstract class Entity<ReadSchema, WriteSchema> {
     public abstract initStatement: string;
@@ -34,6 +53,7 @@ export abstract class Entity<ReadSchema, WriteSchema> {
     public abstract deleteStatement: string;
 
     public abstract findAllStatement: string;
+    public abstract deleteAllStatement: string;
     public abstract countStatement: string;
 
     public async init(db: sqlite.Database): Promise<void> {
@@ -99,6 +119,19 @@ export abstract class Entity<ReadSchema, WriteSchema> {
         await deleteStatement.run({ id });
     }
 
+    public async deleteAll(args: { db: sqlite.Database } & BulkDeleteOperation<WriteSchema>): Promise<void> {
+        const { db } = args;
+
+        // Delete the entities that match the where clause
+        const deleteStatement = await db.prepare<Partial<WhereClause<WriteSchema>> & WriteSchema>(`
+			${this.deleteAllStatement}
+			${this.where(args.where)}`);
+
+        console.warn(deleteStatement);
+
+        await deleteStatement.run({ ...(this.whereParams(args.where) as any) });
+    }
+
     public async findAll(args: { db: sqlite.Database } & BulkReadOperation<ReadSchema>): Promise<Array<ReadSchema>> {
         const { db, where } = args;
 
@@ -106,20 +139,10 @@ export abstract class Entity<ReadSchema, WriteSchema> {
 
         const readStatement = db.prepare<Partial<ReadSchema>>(`
 			${readStatementRaw}
-			${
-                where
-                    ? Object.keys(where)
-                          .map((key: string, index: number) => {
-                              return `
-					${index === 0 ? "WHERE" : "AND"} ${key} = @${key}
-				`;
-                          })
-                          .join("\n")
-                    : ""
-            }
+			${this.where(where)}
 		`);
 
-        const result = await readStatement.all(where ?? {});
+        const result = await readStatement.all((this.whereParams(where) as Partial<ReadSchema>) ?? {});
 
         return result;
     }
@@ -134,5 +157,59 @@ export abstract class Entity<ReadSchema, WriteSchema> {
         const result = await countStatement.all({});
 
         return result;
+    }
+
+    private where(where?: WhereClause<any>): string {
+        return `${
+            where
+                ? Object.keys(where)
+                      .map((key: string, index: number) => {
+                          console.warn(where[key]);
+                          console.warn(this.whereOperation(where[key].operation));
+                          return `
+					${index === 0 ? "WHERE" : "AND"} 
+					${key} ${this.whereOperation(where[key].operation)} ${this.whereValue(key, where[key].operation || "=")}
+				`;
+                      })
+                      .join("\n")
+                : ""
+        }`;
+    }
+
+    private whereParams(where?: WhereClause<any>): Record<string, any> {
+        const result: any = {};
+
+        if (!where) {
+            return result;
+        }
+
+        Object.keys(where).forEach((key: string) => {
+            if (!result[key]) {
+                result[key] = null;
+            } else {
+                result[key] = Array.isArray(where[key].value) ? `${where[key].value.join(",")}` : where[key].value;
+            }
+        });
+
+        return result;
+    }
+
+    private whereOperation(op: WhereOperation): string {
+        switch (op) {
+            case "=":
+            case "eq":
+                return "=";
+            case "in":
+                return "in";
+        }
+    }
+
+    private whereValue(key: string, operation: WhereOperation): string {
+        switch (operation) {
+            case "in":
+                return `(@${key})`;
+            default:
+                return `@${key}`;
+        }
     }
 }

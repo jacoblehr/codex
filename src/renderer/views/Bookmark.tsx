@@ -1,13 +1,16 @@
 import * as React from "react";
-import { VStack, Textarea, FormHelperText } from "@chakra-ui/react";
+import { VStack, Textarea, FormHelperText, useQuery } from "@chakra-ui/react";
 import { Flex, FormControl, FormLabel, Input } from "@chakra-ui/react";
 
 import { Bookmark as TBookmark } from "../../main/db/entities/bookmarks";
-import { Form, Formik } from "formik";
+import { Form, Formik, isInteger } from "formik";
 import { validateRequired } from "../../utils";
 import { useAppContext } from "../context/AppContextProvider";
 import { TabView } from "../hooks/tabs";
-import { CreatableSelect } from "chakra-react-select";
+import { CreatableSelect, OptionBase } from "chakra-react-select";
+import { ReadTag, Tag } from "../../main/db/entities/tags";
+import { useQueryClient } from "react-query";
+import { TAGS_KEY } from "../hooks/tags";
 
 export type bookmarkProps = {
     bookmark?: TBookmark;
@@ -46,8 +49,19 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
                 }}
             >
                 {({ dirty, values, setFieldValue, errors, submitForm }) => {
-                    const handleChange = (key: string) => (e: React.ChangeEvent<FormInput>) => {
-                        setFieldValue(key, e.currentTarget.value);
+                    const queryClient = useQueryClient();
+
+                    const handleChange = (key: string, value?: any) => (e: React.ChangeEvent<FormInput>) => {
+                        setFieldValue(key, value ?? e.currentTarget.value);
+                    };
+
+                    const handleCreateOption = async (newValue: string) => {
+                        await tags.create({ tag: newValue }, (tag: Tag) => {
+                            const updatedValue = values.tags.map((t: Tag) => (t.tag === tag.tag ? tag : t));
+                            setFieldValue("tags", updatedValue);
+
+                            queryClient.invalidateQueries([TAGS_KEY]);
+                        });
                     };
 
                     React.useEffect(() => {
@@ -101,7 +115,15 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
                                 </FormControl>
                                 <FormControl>
                                     <FormLabel htmlFor="tags">Tags</FormLabel>
-                                    <CreatableSelect isMulti={true} options={[]} />
+                                    <CreatableSelect
+                                        id="tags"
+                                        name="tags"
+                                        isMulti={true}
+                                        onCreateOption={handleCreateOption}
+                                        options={tags.data?.map(getTagOption) ?? []}
+                                        onChange={(options: Array<TagOption>) => handleChange("tags", options?.map(getOptionTag) ?? [])}
+                                        defaultValue={values?.tags?.map(getTagOption)}
+                                    />
                                 </FormControl>
                             </VStack>
                         </Form>
@@ -111,3 +133,22 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
         </Flex>
     );
 };
+
+const getTagOption = (tag: Tag) => {
+    return {
+        label: tag.tag,
+        value: tag.id,
+    };
+};
+
+const getOptionTag = (option: TagOption) => {
+    return {
+        id: option.value,
+        tag: option.label,
+    };
+};
+
+interface TagOption extends OptionBase {
+    label: string;
+    value: number;
+}

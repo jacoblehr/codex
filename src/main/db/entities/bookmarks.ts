@@ -12,18 +12,29 @@ export type ReadBookmark = {
     tags: Array<Tag>;
 };
 export type Bookmark = ReadBookmark;
-export type WriteBookmark = Omit<ReadBookmark, "id" | "created_at" | "updated_at" | "tags">;
+export type WriteBookmark = Omit<ReadBookmark, "id" | "created_at" | "updated_at" | "tags"> & {
+    tags?: Array<Tag>;
+};
 
 export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
     public async find(args: { db: sqlite.Database } & ReadOperation<IDSchema>): Promise<ReadBookmark> {
         const bookmark = await super.find(args);
 
-        return bookmark;
+        return {
+            ...bookmark,
+            tags: JSON.parse(bookmark.tags as unknown as string),
+        };
     }
 
     public async findAll(args: { db: sqlite.Database } & BulkReadOperation<ReadBookmark>): Promise<Array<ReadBookmark>> {
         const bookmarks = await super.findAll(args);
-        return bookmarks;
+
+        return bookmarks.map((bookmark: Bookmark) => {
+            return {
+                ...bookmark,
+                tags: JSON.parse(bookmark.tags as unknown as string),
+            };
+        });
     }
 
     public initStatement = `
@@ -49,19 +60,22 @@ export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
 	`;
 
     public findStatement = `
-		SELECT b.*, IFNULL(t.tags, '[]') AS tags
-		FROM bookmarks b
-		LEFT JOIN bookmark_tags bt ON b.id = bt.bookmark_id
-		LEFT JOIN (
-			SELECT _tags.id, json_group_array(
+		SELECT b.*, IFNULL(bt.tags, '[]') AS tags
+		FROM bookmarks b 
+		LEFT JOIN
+		(
+			SELECT b.id, json_group_array(
 				json_object(
-					'id', _tags.id,
-					'tag', _tags.tag
+					'id', t.id,
+					'tag', t.tag
 				)
 			) AS tags
-			FROM tags _tags
-		) AS t ON t.id = bt.tag_id
-		WHERE b.id = @id;
+			FROM bookmarks b
+			JOIN bookmark_tags bt ON b.id = bt.bookmark_id
+			JOIN tags t ON bt.tag_id = t.id
+		) AS bt ON bt.id = b.id
+		WHERE b.id = @id
+		GROUP BY b.id;
 	`;
 
     public updateStatement = `
@@ -80,25 +94,33 @@ export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
 	`;
 
     public findAllStatement = `
-		SELECT b.*, IFNULL(t.tags, '[]') AS tags
-		FROM bookmarks b
-		LEFT JOIN bookmark_tags bt ON b.id = bt.bookmark_id
-		LEFT JOIN (
-			SELECT _tags.id, json_group_array(
+		SELECT b.*, IFNULL(bt.tags, '[]') AS tags
+		FROM bookmarks b 
+		LEFT JOIN
+		(
+			SELECT b.id, json_group_array(
 				json_object(
-					'id', _tags.id,
-					'tag', _tags.tag
+					'id', t.id,
+					'tag', t.tag
 				)
 			) AS tags
-			FROM tags _tags
-		) AS t ON t.id = bt.tag_id;
+			FROM bookmarks b
+			JOIN bookmark_tags bt ON b.id = bt.bookmark_id
+			JOIN tags t ON bt.tag_id = t.id
+		) AS bt ON bt.id = b.id
+		GROUP BY b.id;
+	`;
+
+    public deleteAllStatement = `
+		DELETE
+		FROM bookmarks
 	`;
 
     public countStatement = `
 		SELECT b.id, IFNULL(COUNT(b.id), 0)
 		FROM bookmarks b
 		LEFT JOIN bookmark_tags bt ON b.id = bt.bookmark_id
-		GROUP BY b.id
+		GROUP BY b.id;
 	`;
 }
 

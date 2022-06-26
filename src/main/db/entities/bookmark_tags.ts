@@ -47,6 +47,11 @@ export class BookmarkTags extends Entity<ReadBookmarkTag, WriteBookmarkTag> {
 		WHERE id = @id;
 	`;
 
+    public deleteAllStatement = `
+		DELETE
+		FROM bookmark_tags
+	`;
+
     public findAllStatement = `
 		SELECT *
 		FROM bookmark_tags
@@ -55,7 +60,7 @@ export class BookmarkTags extends Entity<ReadBookmarkTag, WriteBookmarkTag> {
     public countStatement = `
 		SELECT bt.id, count(*)
 		FROM bookmark_tags
-		GROUP BY bt.id
+		GROUP BY bt.id;
 	`;
 }
 

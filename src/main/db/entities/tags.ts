@@ -5,10 +5,10 @@ import { BulkReadOperation, Entity, IDSchema, ReadOperation } from "./entity";
 export type ReadTag = {
     id: number;
     tag: string;
-    bookmarks: Array<Omit<Bookmark, "tags">>;
+    bookmarks?: Array<Omit<Bookmark, "tags">>;
 };
 export type Tag = ReadTag;
-export type WriteTag = Omit<ReadTag, "id">;
+export type WriteTag = Omit<ReadTag, "id" | "bookmarks">;
 
 export class Tags extends Entity<ReadTag, WriteTag> {
     public async find(args: { db: sqlite.Database } & ReadOperation<IDSchema>): Promise<ReadTag> {
@@ -31,15 +31,14 @@ export class Tags extends Entity<ReadTag, WriteTag> {
 	`;
 
     public createStatement = `
-		INSERT INTO tags (bookmark_id, tag)
-		VALUES (@bookmark_id, @tag);
+		INSERT INTO tags (tag)
+		VALUES (@tag);
 	`;
 
     public findStatement = `
-		SELECT t.*, json_array(bt.*) AS bookmarks,
-		FROM tags t
-		LEFT JOIN bookmark_tags bt ON t.id = bt.tag_id
-		WHERE t.id = @id;
+		SELECT *
+		FROM tags
+		WHERE id = @id
 	`;
 
     public updateStatement = `
@@ -55,6 +54,11 @@ export class Tags extends Entity<ReadTag, WriteTag> {
 		WHERE id = @id;
 	`;
 
+    public deleteAllStatement = `
+		DELETE 
+		FROM tags
+	`;
+
     public findAllStatement = `
 		SELECT *
 		FROM tags
@@ -64,7 +68,7 @@ export class Tags extends Entity<ReadTag, WriteTag> {
 		SELECT t.id, IFNULL(COUNT(t.id), 0)
 		FROM tags t
 		LEFT JOIN bookmark_tags bt ON t.id = bt.tag_id
-		GROUP BY t.id
+		GROUP BY t.id;
 	`;
 }
 

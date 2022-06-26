@@ -1,9 +1,9 @@
 const { ipcRenderer } = window.require("electron");
 
-import { useMutation, useQuery, QueryKey, MutationOptions, QueryOptions } from "react-query";
+import { useMutation, useQuery, QueryKey, MutationOptions, QueryOptions, useQueryClient } from "react-query";
 import { IDSchema } from "../../main/db/entities/entity";
 import { WriteBookmark, Bookmark, ReadBookmark } from "../../main/db/entities/bookmarks";
-import { Tag } from "../..//main/db/entities/tags";
+import { Tag, WriteTag } from "../..//main/db/entities/tags";
 
 export const BOOKMARKS_KEY = `bookmarks`;
 export const TAGS_KEY = `tags`;
@@ -72,6 +72,22 @@ export const useGetBookmarks = (options?: QueryOptions<any, {}, Array<Bookmark>,
 /**
  * Tags
  */
+export const useCreateTag = (options?: MutationOptions<Tag, unknown, WriteTag, unknown>) => {
+    const queryClient = useQueryClient();
+
+    const createTag = async (input: WriteTag) => {
+        const tag = await ipcRenderer.invoke("create-tag", {
+            ...input,
+        });
+
+        return tag as Tag;
+    };
+
+    return useMutation<Tag, unknown, WriteTag, unknown>(createTag, {
+        ...options,
+    });
+};
+
 export const useGetTags = (options?: QueryOptions<any, {}, Array<Tag>, QueryKey>) => {
     const getTags = () => {
         return ipcRenderer.invoke("get-tags");

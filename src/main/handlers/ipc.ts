@@ -1,9 +1,11 @@
+import { Tag } from "@chakra-ui/react";
 import { dialog, ipcMain } from "electron";
 
 import db from "../db";
 import Entities from "../db/entities";
 import { ReadBookmark, WriteBookmark } from "../db/entities/bookmarks";
-import { ReadTag } from "../db/entities/tags";
+import BookmarkTags from "../db/entities/bookmark_tags";
+import { ReadTag, WriteTag } from "../db/entities/tags";
 
 export const registerHandlers = () => {
     /**
@@ -76,45 +78,37 @@ export const registerHandlers = () => {
             input: { name, uri, description },
         });
 
-        // const existingTags = await Entities.tags.findAll({
-        //     db: db.database,
-        //     where: {
-        //         bookmark_id: bookmark.id,
-        //     },
-        // });
+        console.warn(bookmark.tags);
+        console.warn(args.tags);
 
-        // const addTags = args.tags.filter((wt: WriteTag) => !tags.find((rt: ReadTag) => rt.tag === wt.tag));
-        // const removeTags = existingTags.filter((rt: ReadTag) => !args.tags.find((wt: WriteTag) => rt.tag === wt.tag));
+        const addTags = args.tags.filter((tag: ReadTag) => !bookmark.tags.find((bookmarkTag: ReadTag) => bookmarkTag.id == tag.id));
+        const removeTags = bookmark.tags.filter((bookmarkTag: ReadTag) => !args.tags.find((tag: ReadTag) => tag.id == bookmarkTag.id));
 
-        // await Promise.all(
-        //     addTags.map(async (tag: WriteTag) => {
-        //         await Entities.tags.create({
-        //             db: db.database,
-        //             input: {
-        //                 bookmark_id: bookmark.id,
-        //                 tag: tag.tag,
-        //             },
-        //         });
-        //     })
-        // );
+        console.warn(addTags);
+        console.warn(removeTags);
 
-        // await Promise.all(
-        //     removeTags.map(async (tag: ReadTag) => {
-        //         await Entities.tags.delete({
-        //             db: db.database,
-        //             id: tag.id,
-        //         });
-        //     })
-        // );
+        await Promise.all(
+            addTags.map(async (tag: ReadTag) => {
+                return await Entities.bookmarkTags.create({
+                    db: db.database,
+                    input: {
+                        tag_id: tag.id,
+                        bookmark_id: id,
+                    },
+                });
+            })
+        );
 
-        // const tags = await Entities.tags.findAll({
-        //     db: db.database,
-        //     where: {
-        //         bookmark_id: bookmark.id,
-        //     },
-        // });
-
-        // bookmark.tags = tags;
+        await Entities.bookmarkTags.deleteAll({
+            db: db.database,
+            where: {
+                tag_id: {
+                    key: "tag_id",
+                    value: removeTags.map((t: ReadTag) => t.id),
+                    operation: "in",
+                },
+            },
+        });
 
         _event.returnValue = bookmark;
         return bookmark;
@@ -135,7 +129,7 @@ export const registerHandlers = () => {
     ipcMain.handle("get-bookmarks", async (_event: Electron.IpcMainInvokeEvent, args: Partial<ReadBookmark>) => {
         const bookmarks = await Entities.bookmarks.findAll({
             db: db.database,
-            where: { ...args },
+            where: {},
         });
 
         _event.returnValue = bookmarks;
@@ -145,10 +139,38 @@ export const registerHandlers = () => {
     ipcMain.handle("get-tags", async (_event: Electron.IpcMainInvokeEvent, args: Partial<ReadTag>) => {
         const tags = await Entities.tags.findAll({
             db: db.database,
-            where: { ...args },
+            where: { ...getWhereClause(args) },
         });
 
         _event.returnValue = tags;
         return tags;
     });
+
+    ipcMain.handle("create-tag", async (_event: Electron.IpcMainInvokeEvent, args: WriteTag) => {
+        const tag = await Entities.tags.create({
+            db: db.database,
+            input: { ...args },
+        });
+
+        _event.returnValue = tag;
+        return tag;
+    });
+};
+
+const getWhereClause = <T>(args: Partial<T>) => {
+    const result: any = {};
+
+    if (!args) {
+        return result;
+    }
+
+    Object.keys(args).forEach((key: string) => {
+        result[key] = {
+            key: key,
+            value: (args as any)[key],
+            operation: "=",
+        };
+    });
+
+    return result;
 };

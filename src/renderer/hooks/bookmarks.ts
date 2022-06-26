@@ -29,9 +29,9 @@ export const useBookmarks = () => {
         setBookmarks(updatedData);
     };
 
-    const create = async (Bookmark: Bookmark, onSuccess?: (data: Bookmark) => void) => {
+    const create = async (bookmark: Bookmark, onSuccess?: (data: Bookmark) => void) => {
         return createBookmark(
-            { ...Bookmark },
+            { ...bookmark },
             {
                 onSuccess: (_data: Bookmark) => {
                     onSuccess && onSuccess(_data);
