@@ -1,5 +1,5 @@
 import * as React from "react";
-import { VStack, Textarea, FormHelperText, useQuery } from "@chakra-ui/react";
+import { VStack, Textarea, FormHelperText } from "@chakra-ui/react";
 import { Flex, FormControl, FormLabel, Input } from "@chakra-ui/react";
 
 import { Bookmark as TBookmark } from "../../main/db/entities/bookmarks";

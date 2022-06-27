@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Flex, Tabs, TabList, TabPanels, Tab, TabPanel, Spinner } from "@chakra-ui/react";
+import { Flex, Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import { AddIcon, CloseIcon } from "@chakra-ui/icons";
 import { useAppContext } from "../context/AppContextProvider";
 import { Tab as AppTab } from "../hooks/tabs";
