@@ -3,14 +3,13 @@ import { VStack, Textarea, FormHelperText, useQuery } from "@chakra-ui/react";
 import { Flex, FormControl, FormLabel, Input } from "@chakra-ui/react";
 
 import { Bookmark as TBookmark } from "../../main/db/entities/bookmarks";
-import { Form, Formik, isInteger } from "formik";
+import { Form, Formik } from "formik";
 import { validateRequired } from "../../utils";
 import { useAppContext } from "../context/AppContextProvider";
 import { TabView } from "../hooks/tabs";
 import { AsyncCreatableSelect, OptionBase } from "chakra-react-select";
-import { ReadTag, Tag } from "../../main/db/entities/tags";
+import { Tag } from "../../main/db/entities/tags";
 import { useQueryClient } from "react-query";
-import { TAGS_KEY } from "../hooks/tags";
 
 export type bookmarkProps = {
     bookmark?: TBookmark;
@@ -63,7 +62,6 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
 
                     React.useEffect(() => {
                         if (dirty && !Object.keys(errors).length) {
-                            console.warn("Saving...");
                             submitForm();
                         }
                     }, [dirty, errors]);
