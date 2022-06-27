@@ -7,7 +7,7 @@ import { Form, Formik, isInteger } from "formik";
 import { validateRequired } from "../../utils";
 import { useAppContext } from "../context/AppContextProvider";
 import { TabView } from "../hooks/tabs";
-import { CreatableSelect, OptionBase } from "chakra-react-select";
+import { AsyncCreatableSelect, OptionBase } from "chakra-react-select";
 import { ReadTag, Tag } from "../../main/db/entities/tags";
 import { useQueryClient } from "react-query";
 import { TAGS_KEY } from "../hooks/tags";
@@ -57,15 +57,13 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
 
                     const handleCreateOption = async (newValue: string) => {
                         await tags.create({ tag: newValue }, (tag: Tag) => {
-                            const updatedValue = values.tags.map((t: Tag) => (t.tag === tag.tag ? tag : t));
-                            setFieldValue("tags", updatedValue);
-
-                            queryClient.invalidateQueries([TAGS_KEY]);
+                            setFieldValue("tags", [...values.tags, tag]);
                         });
                     };
 
                     React.useEffect(() => {
                         if (dirty && !Object.keys(errors).length) {
+                            console.warn("Saving...");
                             submitForm();
                         }
                     }, [dirty, errors]);
@@ -115,14 +113,14 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
                                 </FormControl>
                                 <FormControl>
                                     <FormLabel htmlFor="tags">Tags</FormLabel>
-                                    <CreatableSelect
-                                        id="tags"
+                                    <AsyncCreatableSelect
+                                        id={`tags-${tabs.data[tabs.active].key}`}
                                         name="tags"
                                         isMulti={true}
                                         onCreateOption={handleCreateOption}
                                         options={tags.data?.map(getTagOption) ?? []}
                                         onChange={(options: Array<TagOption>) => handleChange("tags", options?.map(getOptionTag) ?? [])}
-                                        defaultValue={values?.tags?.map(getTagOption)}
+                                        value={values?.tags?.map(getTagOption)}
                                     />
                                 </FormControl>
                             </VStack>

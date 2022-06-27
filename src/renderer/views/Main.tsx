@@ -93,7 +93,7 @@ export const Main = ({}: MainProps) => {
                 <TabPanels display="flex" flex="1" flexDirection="column" justifyContent="center" position="relative" width="100%">
                     {tabs?.data.map((t: AppTab, index: number) => {
                         return (
-                            <TabPanel key={`tab-panel-${index}`} display="flex" flex="1" justifyContent="center">
+                            <TabPanel key={`tab-panel-${index}-${t.data.id}`} display="flex" flex="1" justifyContent="center">
                                 <Bookmark bookmark={t.data} view={t.view} />
                             </TabPanel>
                         );

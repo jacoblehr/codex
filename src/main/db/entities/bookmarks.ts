@@ -73,9 +73,9 @@ export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
 			FROM bookmarks b
 			JOIN bookmark_tags bt ON b.id = bt.bookmark_id
 			JOIN tags t ON bt.tag_id = t.id
+			GROUP BY b.id
 		) AS bt ON bt.id = b.id
-		WHERE b.id = @id
-		GROUP BY b.id;
+		WHERE b.id = @id;
 	`;
 
     public updateStatement = `
@@ -107,8 +107,8 @@ export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
 			FROM bookmarks b
 			JOIN bookmark_tags bt ON b.id = bt.bookmark_id
 			JOIN tags t ON bt.tag_id = t.id
+			GROUP BY b.id
 		) AS bt ON bt.id = b.id
-		GROUP BY b.id;
 	`;
 
     public deleteAllStatement = `

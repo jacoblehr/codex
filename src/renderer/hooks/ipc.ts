@@ -62,7 +62,6 @@ export const useDeleteBookmark = (options?: any) => {
 export const useGetBookmarks = (options?: QueryOptions<any, {}, Array<Bookmark>, QueryKey>) => {
     const getBookmarks = async () => {
         const bookmarks = await ipcRenderer.invoke("get-bookmarks");
-        console.warn(bookmarks);
         return bookmarks;
     };
 
@@ -89,8 +88,10 @@ export const useCreateTag = (options?: MutationOptions<Tag, unknown, WriteTag, u
 };
 
 export const useGetTags = (options?: QueryOptions<any, {}, Array<Tag>, QueryKey>) => {
-    const getTags = () => {
-        return ipcRenderer.invoke("get-tags");
+    const getTags = async () => {
+        const tags = await ipcRenderer.invoke("get-tags");
+        console.warn(tags);
+        return tags;
     };
 
     return useQuery<any, unknown, Array<Tag>, QueryKey>([TAGS_KEY], getTags, { ...options });

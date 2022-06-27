@@ -127,8 +127,6 @@ export abstract class Entity<ReadSchema, WriteSchema> {
 			${this.deleteAllStatement}
 			${this.where(args.where)}`);
 
-        console.warn(deleteStatement);
-
         await deleteStatement.run({ ...(this.whereParams(args.where) as any) });
     }
 

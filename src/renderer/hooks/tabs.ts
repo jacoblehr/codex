@@ -20,7 +20,7 @@ export const useTabs = ({ bookmarks }: UseTabsArgs) => {
 
     React.useEffect(() => {
         data.forEach((t: Tab, i: number) => {
-            const bookmark = bookmarks.find((l: Bookmark) => l.id === t.data?.id);
+            const bookmark = bookmarks.find((b: Bookmark) => b.id === t.data?.id);
             t.data = bookmark;
             update(i, t);
         });

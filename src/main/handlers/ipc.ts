@@ -78,14 +78,8 @@ export const registerHandlers = () => {
             input: { name, uri, description },
         });
 
-        console.warn(bookmark.tags);
-        console.warn(args.tags);
-
         const addTags = args.tags.filter((tag: ReadTag) => !bookmark.tags.find((bookmarkTag: ReadTag) => bookmarkTag.id == tag.id));
         const removeTags = bookmark.tags.filter((bookmarkTag: ReadTag) => !args.tags.find((tag: ReadTag) => tag.id == bookmarkTag.id));
-
-        console.warn(addTags);
-        console.warn(removeTags);
 
         await Promise.all(
             addTags.map(async (tag: ReadTag) => {
