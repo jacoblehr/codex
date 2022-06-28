@@ -5,6 +5,8 @@ import { useAppContext } from "../context/AppContextProvider";
 import { Tab as AppTab } from "../hooks/tabs";
 import { Bookmark } from "./Bookmark";
 import { getRandomID } from "../../utils";
+import { ReadBookmark } from "../../main/db/entities/bookmarks";
+import { ReadTag } from "../../main/db/entities/tags";
 
 type MainProps = {};
 
@@ -54,7 +56,7 @@ export const Main = ({}: MainProps) => {
                                 overflow="auto"
                                 onClick={() => handleTabChange(index)}
                             >
-                                {t.data?.name ?? "Untitled"}
+                                {(t.data as any)?.name ?? (t.data as any)?.tag}
                                 <CloseIcon
                                     marginLeft="0.5rem"
                                     fontSize="0.6rem"
@@ -94,7 +96,8 @@ export const Main = ({}: MainProps) => {
                     {tabs?.data.map((t: AppTab, index: number) => {
                         return (
                             <TabPanel key={`tab-panel-${index}-${t.data.id}`} display="flex" flex="1" justifyContent="center">
-                                <Bookmark bookmark={t.data} view={t.view} />
+                                {(t.view === "bookmark" || t.view === "bookmark-create") && <Bookmark bookmark={t.data as ReadBookmark} view={t.view} />}
+                                {t.view === "tag" && <Tag tag={t.data as ReadTag} />}
                             </TabPanel>
                         );
                     })}
@@ -102,4 +105,8 @@ export const Main = ({}: MainProps) => {
             </Tabs>
         </Flex>
     );
+};
+
+export const Tag = ({ tag }: { tag: ReadTag }) => {
+    return <div />;
 };

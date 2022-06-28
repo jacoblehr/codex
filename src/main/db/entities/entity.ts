@@ -162,8 +162,6 @@ export abstract class Entity<ReadSchema, WriteSchema> {
             where
                 ? Object.keys(where)
                       .map((key: string, index: number) => {
-                          console.warn(where[key]);
-                          console.warn(this.whereOperation(where[key].operation));
                           return `
 					${index === 0 ? "WHERE" : "AND"} 
 					${key} ${this.whereOperation(where[key].operation)} ${this.whereValue(key, where[key].operation || "=")}
@@ -182,7 +180,7 @@ export abstract class Entity<ReadSchema, WriteSchema> {
         }
 
         Object.keys(where).forEach((key: string) => {
-            if (!result[key]) {
+            if (!where[key]) {
                 result[key] = null;
             } else {
                 result[key] = Array.isArray(where[key].value) ? `${where[key].value.join(",")}` : where[key].value;

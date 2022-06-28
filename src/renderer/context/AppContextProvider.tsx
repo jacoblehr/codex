@@ -23,10 +23,12 @@ export const useAppContext = () => React.useContext<AppContext>(AppContext);
 
 export const AppContextProvider: React.FC = ({ children }) => {
     const bookmarksController = useBookmarks();
+    const tagsController = useTags();
+
     const tabsController = useTabs({
         bookmarks: bookmarksController.data ?? [],
+        tags: tagsController.data ?? [],
     });
-    const tagsController = useTags();
 
     const context = {
         tabs: {

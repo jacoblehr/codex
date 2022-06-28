@@ -90,7 +90,6 @@ export const useCreateTag = (options?: MutationOptions<Tag, unknown, WriteTag, u
 export const useGetTags = (options?: QueryOptions<any, {}, Array<Tag>, QueryKey>) => {
     const getTags = async () => {
         const tags = await ipcRenderer.invoke("get-tags");
-        console.warn(tags);
         return tags;
     };
 

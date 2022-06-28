@@ -35,6 +35,7 @@ export const useTags = () => {
             }
         );
     };
+
     return {
         data: data,
         create: create,

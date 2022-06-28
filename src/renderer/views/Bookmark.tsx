@@ -22,18 +22,22 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
     const { bookmarks, tabs, tags } = useAppContext();
 
     const onSubmit = async (values: any) => {
-        console.warn(values);
-        if (!bookmark || view === "bookmark-create") {
-            await bookmarks.create({ ...values }, (response: TBookmark) => {
-                tabs.update(tabs.active, {
-                    ...tabs.data[tabs.active],
-                    key: `bookmark-${response.id}`,
-                    data: response,
-                    view: "bookmark",
+        switch (view) {
+            case "bookmark-create":
+                await bookmarks.create({ ...values }, (response: TBookmark) => {
+                    tabs.update(tabs.active, {
+                        ...tabs.data[tabs.active],
+                        key: `bookmark-${response.id}`,
+                        data: response,
+                        view: "bookmark",
+                    });
                 });
-            });
-        } else {
-            await bookmarks.save(bookmark.id, { ...values });
+                break;
+            case "bookmark":
+                await bookmarks.save(bookmark.id, { ...values });
+                break;
+            default:
+                break;
         }
     };
 

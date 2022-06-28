@@ -13,12 +13,20 @@ export type WriteTag = Omit<ReadTag, "id" | "bookmarks">;
 export class Tags extends Entity<ReadTag, WriteTag> {
     public async find(args: { db: sqlite.Database } & ReadOperation<IDSchema>): Promise<ReadTag> {
         const tag = await super.find(args);
-        return tag;
+        return {
+            ...tag,
+            bookmarks: JSON.parse(tag.bookmarks as unknown as string),
+        };
     }
 
     public async findAll(args: { db: sqlite.Database } & BulkReadOperation<ReadTag>): Promise<Array<ReadTag>> {
         const tags = await super.findAll(args);
-        return tags;
+        return tags.map((tag: Tag) => {
+            return {
+                ...tag,
+                bookmarks: JSON.parse(tag.bookmarks as unknown as string),
+            };
+        });
     }
 
     public initStatement = `
@@ -36,9 +44,26 @@ export class Tags extends Entity<ReadTag, WriteTag> {
 	`;
 
     public findStatement = `
-		SELECT *
-		FROM tags
-		WHERE id = @id
+		SELECT t.*, IFNULL(bt.bookmarks, '[]') AS bookmarks
+		FROM tags t
+		LEFT JOIN
+		(
+			SELECT t.id, json_group_array(
+				json_object(
+					'id', b.id,
+					'uri', b.uri,
+					'description', b.description,
+					'name', b.name,
+					'created_at', b.created_at,
+					'updated_at', b.updated_at
+				)
+			) AS bookmarks
+			FROM tags t
+			JOIN bookmark_tags bt ON t.id = bt.tag_id
+			JOIN bookmarks b ON bt.bookmark_id = b.id
+			GROUP BY t.id
+		) AS bt ON bt.id = t.id
+		WHERE t.id = @id;
 	`;
 
     public updateStatement = `
@@ -60,8 +85,25 @@ export class Tags extends Entity<ReadTag, WriteTag> {
 	`;
 
     public findAllStatement = `
-		SELECT *
-		FROM tags
+		SELECT t.*, IFNULL(bt.bookmarks, '[]') AS bookmarks
+		FROM tags t
+		LEFT JOIN
+		(
+			SELECT t.id, json_group_array(
+				json_object(
+					'id', b.id,
+					'uri', b.uri,
+					'description', b.description,
+					'name', b.name,
+					'created_at', b.created_at,
+					'updated_at', b.updated_at
+				)
+			) AS bookmarks
+			FROM tags t
+			JOIN bookmark_tags bt ON t.id = bt.tag_id
+			JOIN bookmarks b ON bt.bookmark_id = b.id
+			GROUP BY t.id
+		) AS bt ON bt.id = t.id
 	`;
 
     public countStatement = `

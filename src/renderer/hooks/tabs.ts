@@ -1,27 +1,38 @@
 import * as React from "react";
-
 import { Bookmark } from "../../main/db/entities/bookmarks";
+import { Tag } from "../../main/db/entities/tags";
 
-export type TabView = "bookmark" | "bookmark-create";
+export type TabView = "bookmark" | "bookmark-create" | "tag";
 
 export type Tab = {
     key: string;
     view: TabView;
-    data?: Bookmark;
+    data?: Bookmark | Tag;
 };
 
 export type UseTabsArgs = {
     bookmarks: Array<Bookmark>;
+    tags: Array<Tag>;
 };
 
-export const useTabs = ({ bookmarks }: UseTabsArgs) => {
+export const useTabs = ({ bookmarks, tags }: UseTabsArgs) => {
     const [active, setActive] = React.useState<number>(-1);
     const [data, setData] = React.useState<Array<Tab>>(new Array<Tab>());
 
     React.useEffect(() => {
         data.forEach((t: Tab, i: number) => {
-            const bookmark = bookmarks.find((b: Bookmark) => b.id === t.data?.id);
-            t.data = bookmark;
+            switch (t.view) {
+                case "bookmark":
+                case "bookmark-create":
+                    const bookmark = bookmarks.find((b: Bookmark) => b.id === t.data?.id);
+                    t.data = bookmark;
+                    break;
+                case "tag":
+                    const tag = tags.find((tag: Tag) => tag.id === t.data?.id);
+                    t.data = tag;
+                    break;
+            }
+
             update(i, t);
         });
     }, [bookmarks]);

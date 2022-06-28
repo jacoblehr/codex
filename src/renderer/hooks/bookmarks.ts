@@ -3,7 +3,7 @@ import { useQueryClient } from "react-query";
 
 import { Bookmark, Bookmark as BookmarkEntity, WriteBookmark } from "../../main/db/entities/bookmarks";
 
-import { useCreateBookmark, useDeleteBookmark, useGetBookmarks, useUpdateBookmark } from "./ipc";
+import { TAGS_KEY, useCreateBookmark, useDeleteBookmark, useGetBookmarks, useUpdateBookmark } from "./ipc";
 
 export type BookmarkView = {
     key: string;
@@ -49,7 +49,7 @@ export const useBookmarks = () => {
             { id },
             {
                 onSuccess: () => {
-                    queryClient.invalidateQueries([BOOKMARKS_KEY]);
+                    queryClient.invalidateQueries([BOOKMARKS_KEY, TAGS_KEY]);
                 },
                 onError: (e: Error) => {
                     console.warn(`An error has occurred: ${e.message}`);

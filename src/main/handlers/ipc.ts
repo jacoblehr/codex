@@ -1,10 +1,9 @@
-import { Tag } from "@chakra-ui/react";
 import { dialog, ipcMain } from "electron";
+import { Bookmark } from "../../renderer/views/Bookmark";
 
 import db from "../db";
 import Entities from "../db/entities";
 import { ReadBookmark, WriteBookmark } from "../db/entities/bookmarks";
-import BookmarkTags from "../db/entities/bookmark_tags";
 import { ReadTag, WriteTag } from "../db/entities/tags";
 
 export const registerHandlers = () => {
@@ -110,6 +109,17 @@ export const registerHandlers = () => {
 
     ipcMain.handle("delete-bookmark", async (_event: Electron.IpcMainInvokeEvent, args: { id: number }) => {
         const { id } = args;
+
+        await Entities.bookmarkTags.deleteAll({
+            db: db.database,
+            where: {
+                bookmark_id: {
+                    key: "bookmark_id",
+                    value: id,
+                    operation: "=",
+                },
+            },
+        });
 
         const result = await Entities.bookmarks.delete({
             db: db.database,
