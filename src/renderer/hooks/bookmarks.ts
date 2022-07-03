@@ -29,13 +29,14 @@ export const useBookmarks = () => {
         setBookmarks(updatedData);
     };
 
-    const create = async (bookmark: Bookmark, onSuccess?: (data: Bookmark) => void) => {
+    const create = async (bookmark: WriteBookmark, onSuccess?: (data: Bookmark) => void) => {
         return createBookmark(
             { ...bookmark },
             {
                 onSuccess: (_data: Bookmark) => {
                     onSuccess && onSuccess(_data);
                     queryClient.invalidateQueries([BOOKMARKS_KEY]);
+                    queryClient.invalidateQueries([TAGS_KEY]);
                 },
                 onError: (e: Error) => {
                     console.warn(`An error has occurred: ${e.message}`);
@@ -49,7 +50,8 @@ export const useBookmarks = () => {
             { id },
             {
                 onSuccess: () => {
-                    queryClient.invalidateQueries([BOOKMARKS_KEY, TAGS_KEY]);
+                    queryClient.invalidateQueries([BOOKMARKS_KEY]);
+                    queryClient.invalidateQueries([TAGS_KEY]);
                 },
                 onError: (e: Error) => {
                     console.warn(`An error has occurred: ${e.message}`);
@@ -70,18 +72,20 @@ export const useBookmarks = () => {
         updatedData[targetIndex] = {
             ...updatedData[targetIndex],
             ...input,
-            view: "Bookmark",
+            view: "bookmark",
         };
 
         setBookmarks(updatedData);
     };
 
-    const save = (id: number, input: WriteBookmark) => {
-        updateBookmark(
+    const save = (id: number, input: WriteBookmark, onSuccess?: (data: Bookmark) => void) => {
+        return updateBookmark(
             { id, ...input },
             {
-                onSuccess: () => {
+                onSuccess: (_data: Bookmark) => {
                     queryClient.invalidateQueries([BOOKMARKS_KEY]);
+                    queryClient.invalidateQueries([TAGS_KEY]);
+                    onSuccess && onSuccess(_data);
                 },
                 onError: (e: Error) => {
                     console.warn(`An error has occurred: ${e.message}`);

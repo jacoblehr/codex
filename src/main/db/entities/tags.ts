@@ -5,6 +5,7 @@ import { BulkReadOperation, Entity, IDSchema, ReadOperation } from "./entity";
 export type ReadTag = {
     id: number;
     tag: string;
+    color?: string;
     bookmarks?: Array<Omit<Bookmark, "tags">>;
 };
 export type Tag = ReadTag;
@@ -33,6 +34,7 @@ export class Tags extends Entity<ReadTag, WriteTag> {
 		CREATE TABLE IF NOT EXISTS tags (
 			id INTEGER PRIMARY KEY,
 			tag TEXT NOT NULL,
+			color TEXT,
 
 			UNIQUE(tag)
 		);
@@ -53,6 +55,7 @@ export class Tags extends Entity<ReadTag, WriteTag> {
 					'id', b.id,
 					'uri', b.uri,
 					'description', b.description,
+					'image_uri', b.image_uri,
 					'name', b.name,
 					'created_at', b.created_at,
 					'updated_at', b.updated_at
@@ -69,7 +72,8 @@ export class Tags extends Entity<ReadTag, WriteTag> {
     public updateStatement = `
 		UPDATE tags
 		SET
-			tag = @tag
+			tag = @tag,
+			color = @color
 		WHERE id = @id;
 	`;
 
@@ -94,6 +98,7 @@ export class Tags extends Entity<ReadTag, WriteTag> {
 					'id', b.id,
 					'uri', b.uri,
 					'description', b.description,
+					'image_uri', b.image_uri,
 					'name', b.name,
 					'created_at', b.created_at,
 					'updated_at', b.updated_at

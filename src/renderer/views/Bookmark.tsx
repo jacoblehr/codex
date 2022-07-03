@@ -1,15 +1,14 @@
 import * as React from "react";
-import { VStack, Textarea, FormHelperText } from "@chakra-ui/react";
+import { VStack, Textarea, FormHelperText, Button, ButtonGroup } from "@chakra-ui/react";
 import { Flex, FormControl, FormLabel, Input } from "@chakra-ui/react";
 
 import { Bookmark as TBookmark } from "../../main/db/entities/bookmarks";
 import { Form, Formik } from "formik";
-import { validateRequired } from "../../utils";
+import { validateRequired, validateURI } from "../../utils";
 import { useAppContext } from "../context/AppContextProvider";
 import { TabView } from "../hooks/tabs";
-import { AsyncCreatableSelect, OptionBase } from "chakra-react-select";
+import { CreatableSelect, MultiValue, OptionBase } from "chakra-react-select";
 import { Tag } from "../../main/db/entities/tags";
-import { useQueryClient } from "react-query";
 
 export type bookmarkProps = {
     bookmark?: TBookmark;
@@ -34,7 +33,15 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
                 });
                 break;
             case "bookmark":
-                await bookmarks.save(bookmark.id, { ...values });
+                await bookmarks.save(bookmark.id, { ...values }, (response: TBookmark) => {
+                    tabs.update(tabs.active, {
+                        ...tabs.data[tabs.active],
+                        key: `bookmark-${response.id}`,
+                        data: response as any,
+                        view: "bookmark",
+                    });
+                });
+
                 break;
             default:
                 break;
@@ -48,33 +55,45 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
                 initialValues={{ ...bookmark }}
                 onSubmit={onSubmit}
                 validate={(values: TBookmark) => {
-                    return validateRequired(values, ["uri"]);
+                    const requiredErrors = validateRequired(values, ["uri"]);
+                    const urlErrors = validateURI(values.uri);
+
+                    return {
+                        ...requiredErrors,
+                        ...urlErrors,
+                    };
                 }}
             >
                 {({ dirty, values, setFieldValue, errors, submitForm }) => {
-                    const queryClient = useQueryClient();
-
                     const handleChange = (key: string, value?: any) => (e: React.ChangeEvent<FormInput>) => {
                         setFieldValue(key, value ?? e.currentTarget.value);
                     };
 
                     const handleCreateOption = async (newValue: string) => {
                         await tags.create({ tag: newValue }, (tag: Tag) => {
-                            setFieldValue("tags", [...values.tags, tag]);
+                            setFieldValue("tags", [...(values.tags ?? []), tag]);
                         });
                     };
 
-                    React.useEffect(() => {
+                    const handleSubmit = () => {
                         if (dirty && !Object.keys(errors).length) {
                             submitForm();
                         }
-                    }, [dirty, errors]);
+                    };
+
+                    const handleClose = () => {
+                        tabs.remove(tabs.active);
+                    };
+
+                    React.useEffect(() => {
+                        tabs.setDirty(tabs.active, dirty);
+                    }, [dirty]);
 
                     return (
                         <Form style={{ width: "100%" }} noValidate>
                             <VStack w="100%">
                                 <FormControl isRequired>
-                                    <FormLabel htmlFor="url">URI</FormLabel>
+                                    <FormLabel htmlFor="uri">URI</FormLabel>
                                     <Input
                                         as={Input}
                                         id="uri"
@@ -115,16 +134,24 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
                                 </FormControl>
                                 <FormControl>
                                     <FormLabel htmlFor="tags">Tags</FormLabel>
-                                    <AsyncCreatableSelect
-                                        id={`tags-${tabs.data[tabs.active].key}`}
+                                    <CreatableSelect
+                                        id={`tags-${tabs.data[tabs.active].data?.id ?? "new"}`}
                                         name="tags"
                                         isMulti={true}
                                         onCreateOption={handleCreateOption}
                                         options={tags.data?.map(getTagOption) ?? []}
-                                        onChange={(options: Array<TagOption>) => handleChange("tags", options?.map(getOptionTag) ?? [])}
+                                        onChange={(newValue: MultiValue<TagOption>) => {
+                                            setFieldValue("tags", newValue?.map(getOptionTag));
+                                        }}
                                         value={values?.tags?.map(getTagOption)}
                                     />
                                 </FormControl>
+                                <Flex py="1rem">
+                                    <ButtonGroup>
+                                        <Button onClick={handleClose}>Close</Button>
+                                        <Button onClick={handleSubmit}>Save</Button>
+                                    </ButtonGroup>
+                                </Flex>
                             </VStack>
                         </Form>
                     );
@@ -138,6 +165,7 @@ const getTagOption = (tag: Tag) => {
     return {
         label: tag.tag,
         value: tag.id,
+        colorScheme: tag.color || "gray",
     };
 };
 
@@ -145,6 +173,7 @@ const getOptionTag = (option: TagOption) => {
     return {
         id: option.value,
         tag: option.label,
+        color: option.colorScheme,
     };
 };
 

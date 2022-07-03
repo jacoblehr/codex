@@ -7,6 +7,7 @@ import { Tag, WriteTag } from "../..//main/db/entities/tags";
 
 export const BOOKMARKS_KEY = `bookmarks`;
 export const TAGS_KEY = `tags`;
+export const GRAPH_KEY = `graphs`;
 
 /**
  * Bookmarks
@@ -37,11 +38,11 @@ export const useGetBookmark = (id: number, options?: QueryOptions<Bookmark, unkn
     });
 };
 
-export const useUpdateBookmark = (options?: MutationOptions<unknown, unknown, WriteBookmark, unknown>) => {
-    const updateBookmark = (input: IDSchema & WriteBookmark) => {
-        return ipcRenderer.invoke("update-bookmark", {
+export const useUpdateBookmark = (options?: MutationOptions<Bookmark, unknown, WriteBookmark, unknown>) => {
+    const updateBookmark = async (input: IDSchema & WriteBookmark) => {
+        return (await ipcRenderer.invoke("update-bookmark", {
             ...input,
-        }) as Promise<Bookmark>;
+        })) as Bookmark;
     };
 
     return useMutation<Bookmark, unknown, IDSchema & WriteBookmark, unknown>(updateBookmark, { ...options });
@@ -61,6 +62,7 @@ export const useDeleteBookmark = (options?: any) => {
 
 export const useGetBookmarks = (options?: QueryOptions<any, {}, Array<Bookmark>, QueryKey>) => {
     const getBookmarks = async () => {
+        console.warn("REFETCHING BOOKMARKS");
         const bookmarks = await ipcRenderer.invoke("get-bookmarks");
         return bookmarks;
     };
@@ -94,4 +96,14 @@ export const useGetTags = (options?: QueryOptions<any, {}, Array<Tag>, QueryKey>
     };
 
     return useQuery<any, unknown, Array<Tag>, QueryKey>([TAGS_KEY], getTags, { ...options });
+};
+
+export const useUpdateTag = (options?: MutationOptions<Tag, unknown, WriteTag, unknown>) => {
+    const updateTag = async (input: IDSchema & WriteTag) => {
+        return (await ipcRenderer.invoke("update-tag", {
+            ...input,
+        })) as Tag;
+    };
+
+    return useMutation<Tag, unknown, IDSchema & WriteTag, unknown>(updateTag, { ...options });
 };

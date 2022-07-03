@@ -5,6 +5,7 @@ import { Tag } from "./tags";
 export type ReadBookmark = {
     id: number;
     name?: string;
+    image_uri?: string;
     uri: string;
     created_at: string;
     updated_at: string;
@@ -41,8 +42,9 @@ export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
 		CREATE TABLE IF NOT EXISTS bookmarks (
 			id INTEGER PRIMARY KEY,
 			uri TEXT NOT NULL,
-			description TEXT,
 			name TEXT,
+			description TEXT,
+			image_uri TEXT,
 			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME
 		);
@@ -55,8 +57,8 @@ export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
 	`;
 
     public createStatement = `
-		INSERT INTO bookmarks (name, uri, description)
-		VALUES (@name, @uri, @description);
+		INSERT INTO bookmarks (name, uri, description, image_uri)
+		VALUES (@name, @uri, @description, @image_uri);
 	`;
 
     public findStatement = `
@@ -67,7 +69,8 @@ export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
 			SELECT b.id, json_group_array(
 				json_object(
 					'id', t.id,
-					'tag', t.tag
+					'tag', t.tag,
+					'color', t.color
 				)
 			) AS tags
 			FROM bookmarks b
@@ -83,7 +86,8 @@ export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
 		SET
 			name = @name,
 			uri = @uri,
-			description = @description
+			description = @description,
+			image_uri = @image_uri
 		WHERE id = @id;
 	`;
 
@@ -101,7 +105,8 @@ export class Bookmarks extends Entity<ReadBookmark, WriteBookmark> {
 			SELECT b.id, json_group_array(
 				json_object(
 					'id', t.id,
-					'tag', t.tag
+					'tag', t.tag,
+					'color', t.color
 				)
 			) AS tags
 			FROM bookmarks b

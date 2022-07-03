@@ -5,6 +5,7 @@ import db from "../db";
 import Entities from "../db/entities";
 import { ReadBookmark, WriteBookmark } from "../db/entities/bookmarks";
 import { ReadTag, WriteTag } from "../db/entities/tags";
+import openGraph from "open-graph-scraper";
 
 export const registerHandlers = () => {
     /**
@@ -45,12 +46,25 @@ export const registerHandlers = () => {
     /* Bookmarks */
 
     ipcMain.handle("create-bookmark", async (_event: Electron.IpcMainInvokeEvent, args: WriteBookmark) => {
-        const { name, uri, description } = args;
+        const { name, uri, description, image_uri } = args;
 
         const bookmark = await Entities.bookmarks.create({
             db: db.database,
-            input: { name, uri, description },
+            input: { name, uri, description, image_uri },
         });
+
+        const addTags = args.tags;
+        await Promise.all(
+            addTags.map(async (tag: ReadTag) => {
+                return await Entities.bookmarkTags.create({
+                    db: db.database,
+                    input: {
+                        tag_id: tag.id,
+                        bookmark_id: bookmark.id,
+                    },
+                });
+            })
+        );
 
         _event.returnValue = bookmark;
         return bookmark;
@@ -69,12 +83,12 @@ export const registerHandlers = () => {
     });
 
     ipcMain.handle("update-bookmark", async (_event: Electron.IpcMainInvokeEvent, args: WriteBookmark & { id: number }) => {
-        const { id, name, uri, description } = args;
+        const { id, name, uri, description, image_uri } = args;
 
         const bookmark = await Entities.bookmarks.update({
             db: db.database,
             id,
-            input: { name, uri, description },
+            input: { name, uri, description, image_uri },
         });
 
         const addTags = args.tags.filter((tag: ReadTag) => !bookmark.tags.find((bookmarkTag: ReadTag) => bookmarkTag.id == tag.id));
@@ -158,6 +172,19 @@ export const registerHandlers = () => {
 
         _event.returnValue = tag;
         return tag;
+    });
+
+    ipcMain.handle("update-tag", async (_event: Electron.IpcMainInvokeEvent, args: WriteTag & { id: number }) => {
+        const { id, color, tag } = args;
+
+        const bookmark = await Entities.tags.update({
+            db: db.database,
+            id,
+            input: { tag, color },
+        });
+
+        _event.returnValue = bookmark;
+        return bookmark;
     });
 };
 

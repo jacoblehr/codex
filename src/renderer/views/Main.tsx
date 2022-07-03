@@ -7,6 +7,7 @@ import { Bookmark } from "./Bookmark";
 import { getRandomID } from "../../utils";
 import { ReadBookmark } from "../../main/db/entities/bookmarks";
 import { ReadTag } from "../../main/db/entities/tags";
+import { Tag } from "./Tag";
 
 type MainProps = {};
 
@@ -22,6 +23,7 @@ export const Main = ({}: MainProps) => {
             {
                 key: getRandomID(),
                 view: "bookmark-create",
+                dirty: false,
             },
             tabs.data.length
         );
@@ -55,8 +57,10 @@ export const Main = ({}: MainProps) => {
                                 key={`tab-${t.key}`}
                                 overflow="auto"
                                 onClick={() => handleTabChange(index)}
+                                textDecoration={t.dirty ? "italic" : "none"}
                             >
-                                {(t.data as any)?.name ?? (t.data as any)?.tag}
+                                {(t.data as any)?.name ?? (t.data as any)?.tag ?? "Untitled"}
+                                {t.dirty && "*"}
                                 <CloseIcon
                                     marginLeft="0.5rem"
                                     fontSize="0.6rem"
@@ -95,9 +99,9 @@ export const Main = ({}: MainProps) => {
                 <TabPanels display="flex" flex="1" flexDirection="column" justifyContent="center" position="relative" width="100%">
                     {tabs?.data.map((t: AppTab, index: number) => {
                         return (
-                            <TabPanel key={`tab-panel-${index}-${t.data.id}`} display="flex" flex="1" justifyContent="center">
+                            <TabPanel key={`tab-panel-${index}-${t.key}`} display="flex" flex="1" justifyContent="center">
                                 {(t.view === "bookmark" || t.view === "bookmark-create") && <Bookmark bookmark={t.data as ReadBookmark} view={t.view} />}
-                                {t.view === "tag" && <Tag tag={t.data as ReadTag} />}
+                                {t.view === "tag" && <Tag tag={t.data as ReadTag} view="tag" />}
                             </TabPanel>
                         );
                     })}
@@ -105,8 +109,4 @@ export const Main = ({}: MainProps) => {
             </Tabs>
         </Flex>
     );
-};
-
-export const Tag = ({ tag }: { tag: ReadTag }) => {
-    return <div />;
 };

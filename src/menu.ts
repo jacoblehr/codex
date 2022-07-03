@@ -20,6 +20,9 @@ export const menuTemplate = [
             {
                 role: "paste",
             },
+            {
+                role: "selectall",
+            },
         ],
     },
 

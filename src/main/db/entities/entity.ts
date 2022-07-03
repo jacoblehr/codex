@@ -164,7 +164,7 @@ export abstract class Entity<ReadSchema, WriteSchema> {
                       .map((key: string, index: number) => {
                           return `
 					${index === 0 ? "WHERE" : "AND"} 
-					${key} ${this.whereOperation(where[key].operation)} ${this.whereValue(key, where[key].operation || "=")}
+					${key} ${this.whereOperation(where[key].operation)} ${this.whereValue(key, where[key].operation || "=", where[key].value)}
 				`;
                       })
                       .join("\n")
@@ -183,7 +183,7 @@ export abstract class Entity<ReadSchema, WriteSchema> {
             if (!where[key]) {
                 result[key] = null;
             } else {
-                result[key] = Array.isArray(where[key].value) ? `${where[key].value.join(",")}` : where[key].value;
+                result[key] = Array.isArray(where[key].value) ? where[key].value.join(",") : where[key].value;
             }
         });
 
@@ -200,10 +200,10 @@ export abstract class Entity<ReadSchema, WriteSchema> {
         }
     }
 
-    private whereValue(key: string, operation: WhereOperation): string {
+    private whereValue(key: string, operation: WhereOperation, value: any): string {
         switch (operation) {
             case "in":
-                return `(@${key})`;
+                return `(${value.join(",")})`;
             default:
                 return `@${key}`;
         }

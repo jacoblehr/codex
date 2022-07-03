@@ -8,6 +8,7 @@ export type Tab = {
     key: string;
     view: TabView;
     data?: Bookmark | Tag;
+    dirty: boolean;
 };
 
 export type UseTabsArgs = {
@@ -35,7 +36,7 @@ export const useTabs = ({ bookmarks, tags }: UseTabsArgs) => {
 
             update(i, t);
         });
-    }, [bookmarks]);
+    }, [bookmarks, tags]);
 
     const add = (tab: Tab, index?: number) => {
         const tabIndex = data.findIndex((t: Tab) => t.key === tab.key);
@@ -87,6 +88,13 @@ export const useTabs = ({ bookmarks, tags }: UseTabsArgs) => {
         remove(tabIndex);
     };
 
+    const setDirty = (index: number, dirty: boolean) => {
+        const updatedData = [...data];
+        updatedData[index].dirty = dirty;
+
+        setData(updatedData);
+    };
+
     return {
         active,
         data,
@@ -96,5 +104,6 @@ export const useTabs = ({ bookmarks, tags }: UseTabsArgs) => {
         remove,
         removeByKey,
         update,
+        setDirty,
     };
 };

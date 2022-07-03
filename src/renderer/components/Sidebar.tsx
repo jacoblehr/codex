@@ -114,6 +114,7 @@ const BookmarkItem = ({ bookmark, onClick, onRemove }: { bookmark?: Bookmark; on
                     key: `bookmark-${bookmark.id}`,
                     view: "bookmark",
                     data: bookmark,
+                    dirty: false,
                 });
             }}
             cursor="pointer"
@@ -141,6 +142,7 @@ const TagItem = ({ tag, onClick }: { tag?: ReadTag; onClick: (tab: Tab) => void 
                     key: `tag-${tag.id}`,
                     view: "tag",
                     data: tag,
+                    dirty: false,
                 })
             }
             flex="1"
@@ -154,7 +156,9 @@ const TagItem = ({ tag, onClick }: { tag?: ReadTag; onClick: (tab: Tab) => void 
                 <Text fontSize="sm" flex="1" overflow="ellipsis">
                     {tag?.tag}
                 </Text>
-                <Badge mr="0.5rem">{tag.bookmarks?.length ?? 0}</Badge>
+                <Badge colorScheme={tag.color || "gray"} mr="0.5rem">
+                    {tag.bookmarks?.length ?? 0}
+                </Badge>
             </Flex>
         </Flex>
     );
