@@ -15,17 +15,17 @@ export const Main = ({}: MainProps) => {
     const { tabs } = useAppContext();
 
     const handleTabChange = (index: number) => {
-        tabs.setActive(index);
+        tabs?.setActive(index);
     };
 
     const addTab = () => {
-        tabs.add(
+        tabs?.add(
             {
                 key: getRandomID(),
                 view: "bookmark-create",
                 dirty: false,
             },
-            tabs.data.length
+            tabs?.data.length
         );
     };
 
@@ -38,7 +38,7 @@ export const Main = ({}: MainProps) => {
                 flex="1"
                 flexDirection="column"
                 isManual
-                index={tabs.active}
+                index={tabs?.active}
                 width="100%"
                 variant="enclosed-colored"
                 maxHeight="100vh"

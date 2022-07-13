@@ -7,7 +7,7 @@ import { Form, Formik } from "formik";
 import { validateRequired } from "../../utils";
 import { useAppContext } from "../context/AppContextProvider";
 import { TabView } from "../hooks/tabs";
-import { CreatableSelect, OptionBase, Select } from "chakra-react-select";
+import { CreatableSelect, MultiValue, OptionBase, Select, SingleValue } from "chakra-react-select";
 import { Tag as TTag } from "../../main/db/entities/tags";
 
 export type TagProps = {
@@ -23,8 +23,8 @@ export const Tag = ({ tag, view }: TagProps) => {
     const onSubmit = async (values: any) => {
         switch (view) {
             case "tag":
-                await tags.save(tag.id, { ...values }, (response: TTag) => {
-                    tabs.update(tabs.active, {
+                await tags?.save(tag?.id || -1, { ...values }, (response: TTag) => {
+                    tabs?.update(tabs.active, {
                         ...tabs.data[tabs.active],
                         key: `tag-${response.id}`,
                         data: response as any,
@@ -42,7 +42,7 @@ export const Tag = ({ tag, view }: TagProps) => {
         <Flex direction="column" style={{ width: "100%" }}>
             <Formik<TTag>
                 enableReinitialize={true}
-                initialValues={{ ...tag }}
+                initialValues={{ ...(tag as TTag) }}
                 onSubmit={onSubmit}
                 validate={(values: TTag) => {
                     const requiredErrors = validateRequired(values, ["tag"]);
@@ -58,8 +58,8 @@ export const Tag = ({ tag, view }: TagProps) => {
                     };
 
                     const handleCreateOption = async (newValue: string) => {
-                        await bookmarks.create({ uri: newValue }, (bookmark: WriteBookmark) => {
-                            setFieldValue("bookmarks", [...values.bookmarks, bookmark]);
+                        await bookmarks?.create({ uri: newValue }, (bookmark: WriteBookmark) => {
+                            setFieldValue("bookmarks", [...(values.bookmarks || []), bookmark]);
                         });
                     };
 
@@ -70,7 +70,7 @@ export const Tag = ({ tag, view }: TagProps) => {
                     };
 
                     const handleClose = () => {
-                        tabs.remove(tabs.active);
+                        tabs?.remove(tabs.active);
                     };
 
                     return (
@@ -93,22 +93,24 @@ export const Tag = ({ tag, view }: TagProps) => {
                                 <FormControl>
                                     <FormLabel htmlFor="bookmarks">Bookmarks</FormLabel>
                                     <CreatableSelect
-                                        id={`bookmarks-${tags.data[tabs.active]?.id ?? "new"}`}
+                                        id={`bookmarks-${tags?.data ? tags?.data[tabs?.active || -1]?.id ?? "new" : "new"}`}
                                         name="bookmarks"
                                         isMulti={true}
                                         onCreateOption={handleCreateOption}
-                                        options={bookmarks.data?.map(getBookmarkOption) ?? []}
-                                        onChange={(options: Array<BookmarkOption>) => handleChange("bookmarks", options?.map(getOptionTag) ?? [])}
-                                        value={values?.bookmarks?.map(getBookmarkOption)}
+                                        options={bookmarks?.data?.map(getBookmarkOption) ?? []}
+                                        onChange={(options: MultiValue<unknown>) =>
+                                            handleChange("bookmarks", (options as Array<BookmarkOption>)?.map(getOptionBookmark) ?? []) as any
+                                        }
+                                        value={values?.bookmarks?.map(getBookmarkOption as any)}
                                     />
                                 </FormControl>
                                 <FormControl>
                                     <FormLabel htmlFor="color">Color</FormLabel>
                                     <Select
-                                        id={`color-${tags.data[tabs.active]?.id ?? "new"}`}
+                                        id={`color-${tags?.data ? tags?.data[tabs?.active || -1]?.id ?? "new" : "new"}`}
                                         name="color"
                                         options={COLOR_OPTIONS}
-                                        onChange={(option: ColorOption) => setFieldValue("color", option.value)}
+                                        onChange={(option: SingleValue<ColorOption>) => setFieldValue("color", option?.value) as any}
                                         value={getColorOption(values?.color as ColorKey)}
                                     />
                                 </FormControl>
@@ -134,7 +136,7 @@ const getBookmarkOption = (bookmark: Bookmark) => {
     };
 };
 
-const getOptionTag = (option: BookmarkOption) => {
+const getOptionBookmark = (option: BookmarkOption) => {
     return {
         id: option.value,
         tag: option.label,

@@ -97,14 +97,14 @@ export abstract class Entity<ReadSchema, WriteSchema> {
         const { db, id, input } = args;
 
         // Ensure that the entity exists
-        await this.find({ db, id });
+        await this.find({ db, id: id! });
 
         // Update the entity
         const updateStatement = await db.prepare<{ id: number } & WriteSchema>(this.updateStatement);
-        await updateStatement.run({ id, ...input });
+        await updateStatement.run({ id: id!, ...input });
 
         // Re-read the entity
-        const updatedEntity = await this.find({ db, id });
+        const updatedEntity = await this.find({ db, id: id! });
         return updatedEntity as ReadSchema;
     }
 
@@ -164,7 +164,7 @@ export abstract class Entity<ReadSchema, WriteSchema> {
                       .map((key: string, index: number) => {
                           return `
 					${index === 0 ? "WHERE" : "AND"} 
-					${key} ${this.whereOperation(where[key].operation)} ${this.whereValue(key, where[key].operation || "=", where[key].value)}
+					${key} ${this.whereOperation(where[key]?.operation!)} ${this.whereValue(key, where[key]?.operation!, where[key]?.value)}
 				`;
                       })
                       .join("\n")
@@ -183,7 +183,7 @@ export abstract class Entity<ReadSchema, WriteSchema> {
             if (!where[key]) {
                 result[key] = null;
             } else {
-                result[key] = Array.isArray(where[key].value) ? where[key].value.join(",") : where[key].value;
+                result[key] = Array.isArray(where[key]?.value) ? (where[key]?.value ?? []).join(",") : where[key]?.value;
             }
         });
 

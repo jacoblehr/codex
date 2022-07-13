@@ -1,6 +1,6 @@
 const { ipcRenderer } = window.require("electron");
 
-import { useMutation, useQuery, QueryKey, MutationOptions, QueryOptions, useQueryClient } from "react-query";
+import { useMutation, useQuery, QueryKey, MutationOptions, QueryOptions, useQueryClient, QueryFunctionContext } from "react-query";
 import { IDSchema } from "../../main/db/entities/entity";
 import { WriteBookmark, Bookmark, ReadBookmark } from "../../main/db/entities/bookmarks";
 import { Tag, WriteTag } from "../..//main/db/entities/tags";
@@ -62,12 +62,11 @@ export const useDeleteBookmark = (options?: any) => {
 
 export const useGetBookmarks = (options?: QueryOptions<any, {}, Array<Bookmark>, QueryKey>) => {
     const getBookmarks = async () => {
-        console.warn("REFETCHING BOOKMARKS");
         const bookmarks = await ipcRenderer.invoke("get-bookmarks");
         return bookmarks;
     };
 
-    return useQuery<any, unknown, Array<Bookmark>, QueryKey>([BOOKMARKS_KEY], getBookmarks, { ...options });
+    return useQuery<any, {}, Array<Bookmark>, QueryKey>([BOOKMARKS_KEY], getBookmarks, { ...options });
 };
 
 /**
@@ -95,7 +94,7 @@ export const useGetTags = (options?: QueryOptions<any, {}, Array<Tag>, QueryKey>
         return tags;
     };
 
-    return useQuery<any, unknown, Array<Tag>, QueryKey>([TAGS_KEY], getTags, { ...options });
+    return useQuery<any, {}, Array<Tag>, QueryKey>([TAGS_KEY], getTags, { ...options });
 };
 
 export const useUpdateTag = (options?: MutationOptions<Tag, unknown, WriteTag, unknown>) => {

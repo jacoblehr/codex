@@ -4,6 +4,7 @@ import { useQueryClient } from "react-query";
 import { Bookmark, Bookmark as BookmarkEntity, WriteBookmark } from "../../main/db/entities/bookmarks";
 
 import { TAGS_KEY, useCreateBookmark, useDeleteBookmark, useGetBookmarks, useUpdateBookmark } from "./ipc";
+import { Tab } from "./tabs";
 
 export type BookmarkView = {
     key: string;
@@ -20,7 +21,7 @@ export const useBookmarks = () => {
     const { mutate: updateBookmark } = useUpdateBookmark();
     const { mutate: deleteBookmark } = useDeleteBookmark();
 
-    const [bookmarks, setBookmarks] = React.useState([]);
+    const [bookmarks, setBookmarks] = React.useState<Array<Bookmark>>([]);
 
     const queryClient = useQueryClient();
 
@@ -38,8 +39,8 @@ export const useBookmarks = () => {
                     queryClient.invalidateQueries([BOOKMARKS_KEY]);
                     queryClient.invalidateQueries([TAGS_KEY]);
                 },
-                onError: (e: Error) => {
-                    console.warn(`An error has occurred: ${e.message}`);
+                onError: (_: unknown) => {
+                    console.warn(`An unknown error has occurred`);
                 },
             }
         );
@@ -53,8 +54,8 @@ export const useBookmarks = () => {
                     queryClient.invalidateQueries([BOOKMARKS_KEY]);
                     queryClient.invalidateQueries([TAGS_KEY]);
                 },
-                onError: (e: Error) => {
-                    console.warn(`An error has occurred: ${e.message}`);
+                onError: (_: unknown) => {
+                    console.warn(`An unknown error has occurred`);
                 },
             }
         );
@@ -72,7 +73,6 @@ export const useBookmarks = () => {
         updatedData[targetIndex] = {
             ...updatedData[targetIndex],
             ...input,
-            view: "bookmark",
         };
 
         setBookmarks(updatedData);
@@ -87,8 +87,8 @@ export const useBookmarks = () => {
                     queryClient.invalidateQueries([TAGS_KEY]);
                     onSuccess && onSuccess(_data);
                 },
-                onError: (e: Error) => {
-                    console.warn(`An error has occurred: ${e.message}`);
+                onError: (_: unknown) => {
+                    console.warn(`An unknown error has occurred`);
                 },
             }
         );

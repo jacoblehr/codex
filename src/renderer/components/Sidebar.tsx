@@ -1,9 +1,9 @@
 import * as React from "react";
-import { Badge, Flex, Heading, Icon, IconButton, Text, useDisclosure } from "@chakra-ui/react";
+import { Badge, Flex, Heading, Text } from "@chakra-ui/react";
 
-import { ChevronDownIcon, ChevronUpIcon, CloseIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
 import { useAppContext } from "../context/AppContextProvider";
-import Bookmarks, { Bookmark } from "../../main/db/entities/bookmarks";
+import { Bookmark } from "../../main/db/entities/bookmarks";
 import { Tab } from "../hooks/tabs";
 import { ReadTag, Tag } from "../../main/db/entities/tags";
 
@@ -13,9 +13,9 @@ export const Sidebar = ({}: SideBarProps) => {
     const { bookmarks, tabs, tags } = useAppContext();
 
     const handleRemoveClick = (id: number) => {
-        const index = tabs.data.findIndex((t: Tab) => t.data.id === id);
-        tabs.remove(index);
-        bookmarks._delete(id);
+        const index = tabs?.data.findIndex((t: Tab) => t.data?.id === id);
+        tabs?.remove(index || -1);
+        bookmarks?._delete(id);
     };
 
     const [isBookmarkViewOpen, setIsBookmarkViewOpen] = React.useState(true);
@@ -60,10 +60,10 @@ export const Sidebar = ({}: SideBarProps) => {
                             {bookmarks?.data?.map((bookmark: Bookmark) => {
                                 return (
                                     <BookmarkItem
-                                        key={`bookmark-${bookmark.id}`}
+                                        key={`bookmark-${bookmark?.id}`}
                                         bookmark={bookmark}
-                                        onClick={tabs.add}
-                                        onRemove={() => handleRemoveClick(bookmark.id)}
+                                        onClick={tabs?.add!}
+                                        onRemove={() => handleRemoveClick(bookmark?.id)}
                                     />
                                 );
                             })}
@@ -91,7 +91,7 @@ export const Sidebar = ({}: SideBarProps) => {
                     {isTagViewOpen && (
                         <Flex width="100%" direction="column">
                             {tags?.data?.map((tag: Tag, index: number) => {
-                                return <TagItem key={`tag-${tag.id}`} tag={tag} onClick={tabs.add} />;
+                                return <TagItem key={`tag-${tag.id}`} tag={tag} onClick={tabs?.add!} />;
                             })}
                         </Flex>
                     )}
@@ -111,7 +111,7 @@ const BookmarkItem = ({ bookmark, onClick, onRemove }: { bookmark?: Bookmark; on
                 e.stopPropagation();
 
                 onClick({
-                    key: `bookmark-${bookmark.id}`,
+                    key: `bookmark-${bookmark?.id}`,
                     view: "bookmark",
                     data: bookmark,
                     dirty: false,
@@ -127,7 +127,7 @@ const BookmarkItem = ({ bookmark, onClick, onRemove }: { bookmark?: Bookmark; on
                 <Text fontSize="sm" flex="1" textOverflow="ellipsis">
                     {bookmark?.name || "Untitled"}
                 </Text>
-                <Badge mr="0.5rem">{bookmark.tags?.length ?? 0}</Badge>
+                <Badge mr="0.5rem">{bookmark?.tags?.length ?? 0}</Badge>
             </Flex>
         </Flex>
     );
@@ -139,7 +139,7 @@ const TagItem = ({ tag, onClick }: { tag?: ReadTag; onClick: (tab: Tab) => void 
             cursor="pointer"
             onClick={() =>
                 onClick({
-                    key: `tag-${tag.id}`,
+                    key: `tag-${tag?.id}`,
                     view: "tag",
                     data: tag,
                     dirty: false,
@@ -156,8 +156,8 @@ const TagItem = ({ tag, onClick }: { tag?: ReadTag; onClick: (tab: Tab) => void 
                 <Text fontSize="sm" flex="1" overflow="ellipsis">
                     {tag?.tag}
                 </Text>
-                <Badge colorScheme={tag.color || "gray"} mr="0.5rem">
-                    {tag.bookmarks?.length ?? 0}
+                <Badge colorScheme={tag?.color || "gray"} mr="0.5rem">
+                    {tag?.bookmarks?.length ?? 0}
                 </Badge>
             </Flex>
         </Flex>

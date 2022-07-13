@@ -5,7 +5,6 @@ import db from "../db";
 import Entities from "../db/entities";
 import { ReadBookmark, WriteBookmark } from "../db/entities/bookmarks";
 import { ReadTag, WriteTag } from "../db/entities/tags";
-import openGraph from "open-graph-scraper";
 
 export const registerHandlers = () => {
     /**
@@ -31,7 +30,7 @@ export const registerHandlers = () => {
         });
 
         const { canceled, filePath } = saveResult;
-        if (canceled) {
+        if (canceled || !filePath) {
             return;
         }
 
@@ -55,7 +54,7 @@ export const registerHandlers = () => {
 
         const addTags = args.tags;
         await Promise.all(
-            addTags.map(async (tag: ReadTag) => {
+            (addTags ?? []).map(async (tag: ReadTag) => {
                 return await Entities.bookmarkTags.create({
                     db: db.database,
                     input: {
@@ -91,8 +90,8 @@ export const registerHandlers = () => {
             input: { name, uri, description, image_uri },
         });
 
-        const addTags = args.tags.filter((tag: ReadTag) => !bookmark.tags.find((bookmarkTag: ReadTag) => bookmarkTag.id == tag.id));
-        const removeTags = bookmark.tags.filter((bookmarkTag: ReadTag) => !args.tags.find((tag: ReadTag) => tag.id == bookmarkTag.id));
+        const addTags = (args.tags ?? []).filter((tag: ReadTag) => !bookmark.tags.find((bookmarkTag: ReadTag) => bookmarkTag.id == tag.id));
+        const removeTags = bookmark.tags.filter((bookmarkTag: ReadTag) => !(args.tags ?? []).find((tag: ReadTag) => tag.id == bookmarkTag.id));
 
         await Promise.all(
             addTags.map(async (tag: ReadTag) => {

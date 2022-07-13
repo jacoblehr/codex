@@ -16,7 +16,7 @@ export const TAGS_KEY = "tags";
 
 export const useTags = () => {
     const { data } = useGetTags();
-    const [tags, setTags] = React.useState([]);
+    const [tags, setTags] = React.useState<Array<Tag>>([]);
 
     const { mutate: createTag } = useCreateTag();
     const { mutate: updateTag } = useUpdateTag();
@@ -32,8 +32,8 @@ export const useTags = () => {
                     queryClient.invalidateQueries([BOOKMARKS_KEY]);
                     queryClient.invalidateQueries([TAGS_KEY]);
                 },
-                onError: (e: Error) => {
-                    console.warn(`An error has occurred: ${e.message}`);
+                onError: (_: unknown) => {
+                    console.warn(`An unknown error has occurred`);
                 },
             }
         );
@@ -46,7 +46,6 @@ export const useTags = () => {
         updatedData[targetIndex] = {
             ...updatedData[targetIndex],
             ...input,
-            view: "tag",
         };
 
         setTags(updatedData);
@@ -61,8 +60,8 @@ export const useTags = () => {
                     queryClient.invalidateQueries([TAGS_KEY]);
                     onSuccess && onSuccess(_data);
                 },
-                onError: (e: Error) => {
-                    console.warn(`An error has occurred: ${e.message}`);
+                onError: (_: unknown) => {
+                    console.warn(`An unknown error has occurred`);
                 },
             }
         );

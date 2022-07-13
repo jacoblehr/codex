@@ -23,9 +23,9 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
     const onSubmit = async (values: any) => {
         switch (view) {
             case "bookmark-create":
-                await bookmarks.create({ ...values }, (response: TBookmark) => {
-                    tabs.update(tabs.active, {
-                        ...tabs.data[tabs.active],
+                await bookmarks?.create({ ...values }, (response: TBookmark) => {
+                    tabs?.update(tabs?.active, {
+                        ...tabs?.data[tabs?.active],
                         key: `bookmark-${response.id}`,
                         data: response,
                         view: "bookmark",
@@ -33,8 +33,8 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
                 });
                 break;
             case "bookmark":
-                await bookmarks.save(bookmark.id, { ...values }, (response: TBookmark) => {
-                    tabs.update(tabs.active, {
+                await bookmarks?.save(bookmark?.id || -1, { ...values }, (response: TBookmark) => {
+                    tabs?.update(tabs?.active, {
                         ...tabs.data[tabs.active],
                         key: `bookmark-${response.id}`,
                         data: response as any,
@@ -52,7 +52,7 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
         <Flex direction="column" style={{ width: "100%" }}>
             <Formik<TBookmark>
                 enableReinitialize={true}
-                initialValues={{ ...bookmark }}
+                initialValues={{ ...(bookmark as TBookmark) }}
                 onSubmit={onSubmit}
                 validate={(values: TBookmark) => {
                     const requiredErrors = validateRequired(values, ["uri"]);
@@ -70,7 +70,7 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
                     };
 
                     const handleCreateOption = async (newValue: string) => {
-                        await tags.create({ tag: newValue }, (tag: Tag) => {
+                        await tags?.create({ tag: newValue }, (tag: Tag) => {
                             setFieldValue("tags", [...(values.tags ?? []), tag]);
                         });
                     };
@@ -82,11 +82,11 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
                     };
 
                     const handleClose = () => {
-                        tabs.remove(tabs.active);
+                        tabs?.remove(tabs.active);
                     };
 
                     React.useEffect(() => {
-                        tabs.setDirty(tabs.active, dirty);
+                        tabs?.setDirty(tabs.active, dirty);
                     }, [dirty]);
 
                     return (
@@ -135,11 +135,11 @@ export const Bookmark = ({ bookmark, view }: bookmarkProps) => {
                                 <FormControl>
                                     <FormLabel htmlFor="tags">Tags</FormLabel>
                                     <CreatableSelect
-                                        id={`tags-${tabs.data[tabs.active].data?.id ?? "new"}`}
+                                        id={`tags-${tabs?.data[tabs.active].data?.id ?? "new"}`}
                                         name="tags"
                                         isMulti={true}
                                         onCreateOption={handleCreateOption}
-                                        options={tags.data?.map(getTagOption) ?? []}
+                                        options={tags?.data?.map(getTagOption) ?? []}
                                         onChange={(newValue: MultiValue<TagOption>) => {
                                             setFieldValue("tags", newValue?.map(getOptionTag));
                                         }}
